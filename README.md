@@ -25,4 +25,13 @@ provide the basis for the work done in this project.
 
 ## Building
 
+Currently the project is in a state of "builds on my machine" unfortunately,
+though it may be possible to get it to build elsewhere.
+
+Prerequisites:
+
+  * Clang and LLVM built and installed from source somewhere - I think the LLVM
+    discovery module for CMake should pick it up from there.
+  * `clang-omp` installed - on mac OS this can be done using homebrew.
+
 ## Usage
