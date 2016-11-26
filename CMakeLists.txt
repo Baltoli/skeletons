@@ -29,9 +29,7 @@ add_executable(map
   examples/util.c
   examples/map.c
 )
-set_target_properties(map PROPERTIES 
-   COMPILE_FLAGS "-fopenmp"
-)
+set_target_properties(map PROPERTIES COMPILE_FLAGS "-O3 -fopenmp")
 target_link_libraries(map "/usr/local/lib/libiomp5.dylib")
 
 # The main tool targets C++11
