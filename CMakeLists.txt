@@ -2,8 +2,14 @@ cmake_minimum_required(VERSION 2.8.12)
 project(SimpleProject)
 
 # Use the version of clang that has OpenMP support included
-set(CMAKE_C_COMPILER /auto/groups/acs-software/L25/llvm/bin/clang CACHE STRING "C compiler" FORCE)
-set(CMAKE_CXX_COMPILER /auto/groups/acs-software/L25/llvm/bin/clang++ CACHE STRING "C++ compiler" FORCE)
+if(APPLE)
+  set(CMAKE_C_COMPILER clang CACHE STRING "C compiler" FORCE)
+  set(CMAKE_CXX_COMPILER clang-omp CACHE STRING "C compiler" FORCE)
+endif()
+if(UNIX AND NOT APPLE)
+  set(CMAKE_C_COMPILER /auto/groups/acs-software/L25/llvm/bin/clang CACHE STRING "C compiler" FORCE)
+  set(CMAKE_CXX_COMPILER /auto/groups/acs-software/L25/llvm/bin/clang++ CACHE STRING "C++ compiler" FORCE)
+endif()
 
 # Find and set up LLVM
 find_package(LLVM REQUIRED CONFIG)
