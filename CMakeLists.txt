@@ -3,8 +3,8 @@ project(SimpleProject)
 
 # Use the version of clang that has OpenMP support included
 if(APPLE)
-  set(CMAKE_C_COMPILER clang CACHE STRING "C compiler" FORCE)
-  set(CMAKE_CXX_COMPILER clang-omp CACHE STRING "C compiler" FORCE)
+  set(CMAKE_C_COMPILER clang-omp CACHE STRING "C compiler" FORCE)
+  set(CMAKE_CXX_COMPILER clang-omp++ CACHE STRING "C compiler" FORCE)
 endif()
 if(UNIX AND NOT APPLE)
   set(CMAKE_C_COMPILER /auto/groups/acs-software/L25/llvm/bin/clang CACHE STRING "C compiler" FORCE)
@@ -13,11 +13,13 @@ endif()
 
 # Find and set up LLVM
 find_package(LLVM REQUIRED CONFIG)
+
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # Include LLVM headers
 include_directories(${LLVM_INCLUDE_DIRS})
+link_directories(${LLVM_LIBDIR})
 include_directories(~/opt/include)
 add_definitions(${LLVM_DEFINITIONS})
 
@@ -26,7 +28,9 @@ add_definitions(${LLVM_DEFINITIONS})
 add_executable(skel
   src/main.cc 
 )
-foreach(i Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse Sema Serialization Tooling)
+foreach(i Analysis AST ASTMatchers Basic Driver Edit Frontend FrontendTool Lex
+    Parse Rewrite RewriteFrontend StaticAnalyzerFrontend StaticAnalyzerCheckers
+    StaticAnalyzerCore ToolingCore Format Sema Serialization Tooling)
   target_link_libraries(skel clang${i})
 endforeach(i)
 
@@ -50,7 +54,8 @@ set(CMAKE_C_FLAGS "-std=c11")
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
-llvm_map_components_to_libnames(llvm_libs support core irreader)
+llvm_map_components_to_libnames(llvm_libs support core irreader bitreader
+  mcparser option profiledata)
 
 # Link against LLVM libraries
 target_link_libraries(skel ${llvm_libs})
