@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8.12)
 project(SimpleProject)
 
 # Use the version of clang that has OpenMP support included
-set(CMAKE_C_COMPILER clang-omp CACHE STRING "C compiler" FORCE)
-set(CMAKE_CXX_COMPILER clang-omp++ CACHE STRING "C++ compiler" FORCE)
+set(CMAKE_C_COMPILER /auto/groups/acs-software/L25/llvm/bin/clang CACHE STRING "C compiler" FORCE)
+set(CMAKE_CXX_COMPILER /auto/groups/acs-software/L25/llvm/bin/clang++ CACHE STRING "C++ compiler" FORCE)
 
 # Find and set up LLVM
 find_package(LLVM REQUIRED CONFIG)
@@ -12,6 +12,7 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # Include LLVM headers
 include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(~/opt/include)
 add_definitions(${LLVM_DEFINITIONS})
 
 # Build the main executable for the project, linked against clang tooling
@@ -30,10 +31,10 @@ add_executable(map
   examples/map.c
 )
 set_target_properties(map PROPERTIES COMPILE_FLAGS "-O3 -fopenmp")
-target_link_libraries(map "/usr/local/lib/libiomp5.dylib")
+target_link_libraries(map "/home/bsc28/opt/lib/libiomp5.so.5")
 
 # The main tool targets C++11
-set(CMAKE_CXX_FLAGS "-std=c++1z")
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
