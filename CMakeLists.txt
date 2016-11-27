@@ -31,10 +31,16 @@ add_executable(map
   examples/map.c
 )
 set_target_properties(map PROPERTIES COMPILE_FLAGS "-O3 -fopenmp")
-target_link_libraries(map "/home/bsc28/opt/lib/libiomp5.so.5")
+if(UNIX AND NOT APPLE)
+  target_link_libraries(map "/home/bsc28/opt/lib/libiomp5.so")
+endif()
+if(APPLE)
+  target_link_libraries(map "/usr/local/lib/libiomp5.dylib")
+endif()
 
 # The main tool targets C++11
 set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_C_FLAGS "-std=c11")
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use

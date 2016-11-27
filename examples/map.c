@@ -42,7 +42,7 @@ void map_par(int (*work)(int), int *arr, int *out, size_t n) {
 
 
 int main(void) {
-  const size_t size = 1000000;
+  const size_t size = 10000000;
 
   double fill_start = omp_get_wtime();
   int *seq_nums = malloc(size * sizeof(int));
