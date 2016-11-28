@@ -49,6 +49,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${LLVM_PREFIX}/share/llvm/cmake")
 
 add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
+include_directories("${CLANG_RESOURCE_DIR}/include")
 link_directories(${LLVM_LIBRARY_DIRS})
 
 exec_program(${CMAKE_LLVM_CONFIG} ARGS --cflags   OUTPUT_VARIABLE LLVM_C)
