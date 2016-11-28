@@ -2,18 +2,10 @@
 #define DETECT_SKELETONS_AST_CONSUMER_H
 
 #include <clang/AST/ASTConsumer.h>
-#include <clang/ASTMatchers/ASTMatchers.h>
-#include <clang/ASTMatchers/ASTMatchFinder.h>
+
+#include "MapMatcher.hh"
 
 using namespace clang;
-using namespace clang::ast_matchers;
-
-class ForLoopHandler : public MatchFinder::MatchCallback {
-  public:
-    ForLoopHandler();
-    virtual void run(const MatchFinder::MatchResult &Result);
-};
-  
 class DetectSkeletonsASTConsumer : public ASTConsumer {
   public:
     DetectSkeletonsASTConsumer();
@@ -21,7 +13,7 @@ class DetectSkeletonsASTConsumer : public ASTConsumer {
 
   private:
     MatchFinder Matcher;
-    ForLoopHandler ForHandler;
+    MapHandler mapHandler;
 };
 
 #endif

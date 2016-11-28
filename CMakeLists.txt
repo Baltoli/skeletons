@@ -64,7 +64,7 @@ add_executable(skel
   src/main.cc 
   src/DetectSkeletonsAction.cc
   src/DetectSkeletonsASTConsumer.cc
-  src/MapVisitor.cc
+  src/MapMatcher.cc
 )
 foreach(i
         AST
