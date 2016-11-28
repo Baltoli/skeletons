@@ -12,13 +12,19 @@ using namespace clang;
 using namespace clang::tooling;
 using std::string;
 
+class MyASTConsumer : public ASTConsumer {
+  public:
+    void HandleTranslationUnit(ASTContext &context) {
+    }
+};
+
 class MyFrontendAction : public ASTFrontendAction {
   public:
     MyFrontendAction() {}
 
     std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef InFile) {
       std::cout << InFile.str() << std::endl;
-      return nullptr;
+      return std::unique_ptr<ASTConsumer>(new MyASTConsumer());
     }
 };
 

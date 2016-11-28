@@ -4,7 +4,7 @@
 #include "util.h"
 
 void range_fill(int *arr, size_t n) {
-  for(int i = 0; i < n; i++) {
+  for(size_t i = 0; i < n; i++) {
     arr[i] = i;
   }
 }
