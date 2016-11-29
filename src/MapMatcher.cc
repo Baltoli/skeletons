@@ -16,7 +16,7 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
 }
 
 StatementMatcher MapHandler::matcher() {
-  return(
+  return (
     forStmt(
       hasLoopInit(loopInitMatcher()),
       hasCondition(loopConditionMatcher()),
@@ -27,14 +27,26 @@ StatementMatcher MapHandler::matcher() {
 
 StatementMatcher MapHandler::loopInitMatcher() {
   return (
-    declStmt(hasSingleDecl(varDecl(
-      hasInitializer(ignoringParenImpCasts(integerLiteral(equals(0)))
-    ))))
+    declStmt(hasSingleDecl(
+      varDecl(
+        hasInitializer(ignoringParenImpCasts(integerLiteral(equals(0))))
+      ).bind("initVar")
+    ))
   );
 }
 
 StatementMatcher MapHandler::loopConditionMatcher() {
-  return expr();
+  return (
+    binaryOperator(
+      hasOperatorName("<"),
+      hasLHS(ignoringParenImpCasts(
+        declRefExpr(to(varDecl(hasType(isInteger())).bind("condVar")))
+      )),
+      hasRHS(ignoringParenImpCasts(
+        expr(hasType(isInteger()))
+      ))
+    )
+  );
 }
 
 StatementMatcher MapHandler::loopIncrementMatcher() {

@@ -24,7 +24,6 @@ class MapHandler : public MatchFinder::MatchCallback {
      */
     StatementMatcher matcher();
 
-  private:
     /**
      * Clang AST matcher that matches for-loop initialization statements that
      * could be part of a map operation.
@@ -39,12 +38,19 @@ class MapHandler : public MatchFinder::MatchCallback {
     /**
      * Clang AST matcher that matches for-loop conditions that could be part of
      * a map operation.
+     *
+     * This will match conditions that:
+     *  - Compare using the < operator
+     *  - Compare to a single variable
      */
     StatementMatcher loopConditionMatcher();
     
     /**
      * Clang AST matcher that matches for-loop increments that could be part of
      * a map operation.
+     *
+     * This will match increment statements that:
+     *  - Pre or post increment the variable defined in the initializer
      */
     StatementMatcher loopIncrementMatcher();
 };
