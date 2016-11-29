@@ -12,6 +12,9 @@ class MapHandler : public MatchFinder::MatchCallback {
     virtual void run(const MatchFinder::MatchResult &Result);
 
     StatementMatcher matcher();
+
+  private:
+    StatementMatcher loopInitMatcher();
 };
   
 

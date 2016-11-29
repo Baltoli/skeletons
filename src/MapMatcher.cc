@@ -14,7 +14,15 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
 StatementMatcher MapHandler::matcher() {
   return(
     forStmt(
-      hasLoopInit(stmt())
+      hasLoopInit(loopInitMatcher())
     ).bind("for")
+  );
+}
+
+StatementMatcher MapHandler::loopInitMatcher() {
+  return (
+    declStmt(hasSingleDecl(varDecl(
+      hasInitializer(ignoringParenImpCasts(integerLiteral(equals(0)))
+    ))))
   );
 }
