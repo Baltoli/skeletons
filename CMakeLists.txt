@@ -70,7 +70,7 @@ include_directories(
 	${CMAKE_BINARY_DIR}/include      # config.h
 )
 
-add_llvm_executable(main 
+add_llvm_executable(skel
   src/main.cc
   src/DetectSkeletonsAction.cc
   src/DetectSkeletonsASTConsumer.cc
@@ -79,8 +79,8 @@ foreach(i
 	Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse
 	Sema Serialization Tooling
 )
-	target_link_libraries(main clang${i})
+	target_link_libraries(skel clang${i})
 endforeach(i)
 
 llvm_map_components_to_libraries(LLVM_LIBS bitreader mcparser)
-target_link_libraries(main ${LLVM_LIBS} tinfo)
+target_link_libraries(skel ${LLVM_LIBS} tinfo)
