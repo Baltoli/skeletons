@@ -43,17 +43,10 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
       [&](string s) { return getDeclName(Result, s); }
     );
 
-    auto all_bound = std::all_of(
-        bindings.begin(), bindings.end(), [&](string s) { return s != ""; });
-
-    if(!all_bound) {
-      llvm::errs() << "For loop with less than 3 variable uses\n";
-      return;
-    }
-
     auto all_equal = allEqual(bindings);
     if(!all_equal) {
-      llvm::errs() << "For loop referencing different variables\n";
+      llvm::errs() << "Near miss for [map]: "
+                   << "For loop referencing different variables\n";
       return;
     }
 
