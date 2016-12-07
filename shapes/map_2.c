@@ -5,6 +5,6 @@ int main(void) {
 
   int N;
   for(int j = 0; j < N; ++j) {
-    x[i] = f(y[i]);
+    x[j] = f(y[j]);
   }
 }

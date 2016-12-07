@@ -9,9 +9,14 @@ MapHandler::MapHandler() {}
 
 void MapHandler::run(const MatchFinder::MatchResult &Result) {
   if(const ForStmt *forS = Result.Nodes.getNodeAs<ForStmt>("for")) {
-    forS->dumpPretty(*Result.Context);
-    forS->dumpColor();
-    llvm::errs() << '\n';
+    auto loc = Result.Context->getFullLoc(forS->getLocStart());
+
+    llvm::errs() << "[map] " 
+                 << "line "
+                 << loc.getExpansionLineNumber() 
+                 << ", column "
+                 << loc.getExpansionColumnNumber()
+                 << '\n';
   }
 }
 
