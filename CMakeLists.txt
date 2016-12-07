@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(TESLA)
-
-#
-# CMake helpers.
-#
+project(Skeletons)
 
 # Include LLVM configuration:
 find_package(LLVM REQUIRED)
