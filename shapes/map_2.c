@@ -3,7 +3,8 @@ int f(int);
 int main(void) {
   int *x, *y;
 
-  for(int i = 0; i < 100; i++) {
+  int N;
+  for(int j = 0; j < N; ++j) {
     x[i] = f(y[i]);
   }
 }
