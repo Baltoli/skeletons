@@ -5,7 +5,7 @@ int main(void) {
 
   int N;
   // CHECK: Found
-  // CHECK: line 9
+  // CHECK: line [[@LINE+1]]
   for(int j = 0; j < N; ++j) {
     x[j] = f(y[j]);
   }

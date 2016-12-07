@@ -84,3 +84,10 @@ endforeach(i)
 
 llvm_map_components_to_libraries(LLVM_LIBS bitreader mcparser)
 target_link_libraries(skel ${LLVM_LIBS} tinfo)
+
+option(ENABLE_TESTS "Enable the tests")
+
+if(ENABLE_TESTS)
+  enable_testing()
+  add_subdirectory("shapes")
+endif()
