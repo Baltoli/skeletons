@@ -50,5 +50,12 @@ StatementMatcher MapHandler::loopConditionMatcher() {
 }
 
 StatementMatcher MapHandler::loopIncrementMatcher() {
-  return stmt();
+  return (
+    unaryOperator(
+      hasOperatorName("++"),
+      hasUnaryOperand(ignoringParenImpCasts(
+        declRefExpr(to(varDecl(hasType(isInteger())).bind("incVar")))
+      ))
+    )
+  );
 }
