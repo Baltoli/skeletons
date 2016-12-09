@@ -57,12 +57,6 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    if(!hasMappableBody(forS)) {
-      log(Debug, "Near miss for Map: "
-                 "For loop does not have a mappable body");
-      return;
-    }
-
     auto loc = Result.Context->getFullLoc(forS->getLocStart());
     log(Output, successOutputMessage(loc));
     
@@ -81,20 +75,13 @@ void MapHandler::addParallelAnnotation(SourceLocation loc,
   r.overwriteChangedFiles();
 }
 
-bool MapHandler::hasMappableBody(const ForStmt *stmt) {
-  if(!stmt) {
-    return true;
-  }
-
-  return false;
-}
-
 StatementMatcher MapHandler::matcher() {
   return (
     forStmt(
       hasLoopInit(loopInitMatcher()),
       hasCondition(loopConditionMatcher()),
-      hasIncrement(loopIncrementMatcher())
+      hasIncrement(loopIncrementMatcher()),
+      hasBody(bodyMatcher())
     ).bind("for")
   );
 }
@@ -131,6 +118,12 @@ StatementMatcher MapHandler::loopIncrementMatcher() {
         declRefExpr(to(varDecl(hasType(isInteger())).bind("incVar")))
       ))
     )
+  );
+}
+
+StatementMatcher MapHandler::bodyMatcher() {
+  return (
+    stmt()
   );
 }
 

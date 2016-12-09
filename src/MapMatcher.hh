@@ -53,6 +53,15 @@ class MapHandler : public MatchFinder::MatchCallback {
      *  - Pre or post increment the variable defined in the initializer
      */
     StatementMatcher loopIncrementMatcher();
+
+    /**
+     * Clang AST matcher that matches the body of a for-loop that could be a
+     * mappable operation.
+     *
+     * This will match bodies that:
+     *  - TODO
+     */
+    StatementMatcher bodyMatcher();
   private:
     void addParallelAnnotation(clang::SourceLocation loc, 
                                const clang::ast_matchers::MatchFinder::MatchResult &Result);
