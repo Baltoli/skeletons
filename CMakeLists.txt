@@ -74,7 +74,8 @@ add_llvm_executable(skel
   src/main.cc
   src/DetectSkeletonsAction.cc
   src/DetectSkeletonsASTConsumer.cc
-  src/MapMatcher.cc)
+  src/MapMatcher.cc
+  src/Log.cc)
 foreach(i
 	Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse
 	Sema Serialization Tooling
