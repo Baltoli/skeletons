@@ -122,6 +122,16 @@ StatementMatcher MapHandler::loopIncrementMatcher() {
 }
 
 StatementMatcher MapHandler::bodyMatcher() {
+  // TODO: what do we want to match here? and will it need further verification?
+  // Things to think about:
+  //  - Easiest case is DAXPY style array motion calling a single function.
+  //  - From there need to check that the output array is not modified after the
+  //    assignment is made (as otherwise the map properties might not be quite
+  //    right.
+  //  - Extension: how could it be possible to generalise from a direct function
+  //    call to allowing previous work done to be used? Halfway step could be to
+  //    allow anything that doesn't mutate the input or output array (same
+  //    afterwards?)
   return (
     stmt()
   );
