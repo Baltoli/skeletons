@@ -5,6 +5,8 @@
 #include <sstream>
 
 #include <llvm/Support/raw_ostream.h>
+#include <clang/Rewrite/Core/Rewriter.h>
+#include <clang/Basic/LangOptions.h>
 
 #include "Log.hh"
 
@@ -55,9 +57,36 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
+    if(!hasMappableBody(forS)) {
+      log(Debug, "Near miss for Map: "
+                 "For loop does not have a mappable body");
+      return;
+    }
+
     auto loc = Result.Context->getFullLoc(forS->getLocStart());
     log(Output, successOutputMessage(loc));
+    
+    addParallelAnnotation(forS->getLocStart(), Result);
   }
+}
+
+void MapHandler::addParallelAnnotation(SourceLocation loc, 
+                                       const MatchFinder::MatchResult &Result)
+{
+  // TODO: Is an empty LangOptions OK here? My instinct is that it probably is
+  // as long as we are *only* doing simple insertion of text into the source
+  // file.
+  Rewriter r(*Result.SourceManager, LangOptions());
+  r.InsertText(loc, "// Hello there\n", false, true);
+  r.overwriteChangedFiles();
+}
+
+bool MapHandler::hasMappableBody(const ForStmt *stmt) {
+  if(!stmt) {
+    return true;
+  }
+
+  return false;
 }
 
 StatementMatcher MapHandler::matcher() {

@@ -54,6 +54,9 @@ class MapHandler : public MatchFinder::MatchCallback {
      */
     StatementMatcher loopIncrementMatcher();
   private:
+    void addParallelAnnotation(clang::SourceLocation loc, 
+                               const clang::ast_matchers::MatchFinder::MatchResult &Result);
+    bool hasMappableBody(const clang::ForStmt *stmt);
     std::string successOutputMessage(clang::FullSourceLoc loc);
 };
   

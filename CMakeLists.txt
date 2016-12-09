@@ -78,7 +78,7 @@ add_llvm_executable(skel
   src/Log.cc)
 foreach(i
 	Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse
-	Sema Serialization Tooling
+        Rewrite Sema Serialization Tooling
 )
 	target_link_libraries(skel clang${i})
 endforeach(i)
