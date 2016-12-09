@@ -53,6 +53,8 @@ class MapHandler : public MatchFinder::MatchCallback {
      *  - Pre or post increment the variable defined in the initializer
      */
     StatementMatcher loopIncrementMatcher();
+  private:
+    std::string successOutputMessage(clang::FullSourceLoc loc);
 };
   
 

@@ -2,8 +2,11 @@
 
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 #include <llvm/Support/raw_ostream.h>
+
+#include "Log.hh"
 
 using std::vector;
 using std::string;
@@ -35,6 +38,8 @@ static bool allEqual(vector<string> ss) {
 MapHandler::MapHandler() {}
 
 void MapHandler::run(const MatchFinder::MatchResult &Result) {
+  log(Debug, "Handling Map match result");
+
   if(const ForStmt *forS = Result.Nodes.getNodeAs<ForStmt>("for")) {
     vector<string> bindings = { "initVar", "condVar", "incVar" };
 
@@ -45,19 +50,13 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
 
     auto all_equal = allEqual(bindings);
     if(!all_equal) {
-      llvm::errs() << "Near miss for [map]: "
-                   << "For loop referencing different variables\n";
+      log(Debug, "Near miss for Map: "
+                 "For loop referencing different variables");
       return;
     }
 
     auto loc = Result.Context->getFullLoc(forS->getLocStart());
-
-    llvm::errs() << "Found [map] at: " 
-                 << "line "
-                 << loc.getExpansionLineNumber() 
-                 << ", column "
-                 << loc.getExpansionColumnNumber()
-                 << '\n';
+    log(Output, successOutputMessage(loc));
   }
 }
 
@@ -104,4 +103,14 @@ StatementMatcher MapHandler::loopIncrementMatcher() {
       ))
     )
   );
+}
+
+string MapHandler::successOutputMessage(FullSourceLoc loc) {
+  std::stringstream out;
+  out << "Found Map at: " 
+      << "line "
+      << loc.getExpansionLineNumber() 
+      << ", column "
+      << loc.getExpansionColumnNumber();
+  return out.str();
 }

@@ -5,6 +5,7 @@
 #include <llvm/Support/CommandLine.h>
 
 #include "DetectSkeletonsAction.hh"
+#include "Log.hh"
 
 using namespace llvm;
 using namespace clang;
