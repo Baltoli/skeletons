@@ -57,6 +57,12 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
+    const BinaryOperator *op = Result.Nodes.getNodeAs<BinaryOperator>("op");
+    if(!op || !op->isAssignmentOp()) {
+      log(Error, "Weird non-assignment binary op");
+      return;
+    }
+
     auto loc = Result.Context->getFullLoc(forS->getLocStart());
     log(Output, successOutputMessage(loc));
     
@@ -122,8 +128,6 @@ StatementMatcher MapHandler::loopIncrementMatcher() {
 }
 
 StatementMatcher MapHandler::bodyMatcher() {
-  // TODO: need to check this further up the road to verify that the op is
-  //       actually an assignment operator
   return (
     compoundStmt(hasAnySubstatement(binaryOperator(
       hasLHS(ignoringParenImpCasts(
