@@ -63,7 +63,7 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    if(!isValidMapBody(forS->getBody())) {
+    if(!isValidMapBody(forS->getBody(), op)) {
       log(Debug, "Near miss for Map: "
                  "For loop doesn't have a mappable body");
       return;
@@ -76,7 +76,7 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
   }
 }
 
-bool MapHandler::isValidMapBody(const Stmt *body) {
+bool MapHandler::isValidMapBody(const Stmt *body, const BinaryOperator *op) {
   // If the loop body is empty, then no harm done in marking it as parallel,
   // though there *should* be no way to actually trigger this behaviour in real
   // execution because of AST matching.
@@ -95,7 +95,7 @@ bool MapHandler::isValidMapBody(const Stmt *body) {
     // body as being mappable:
     //  - Assigning to anything in the source, at any point
     //  - Assigning to the target at an offset that *isn't* the loop index
-    if(assignsToArray(stmt, "x", "i")) {
+    if(assignsToArray(stmt, "x", "i", op)) {
       return false;
     }
   }
@@ -103,10 +103,12 @@ bool MapHandler::isValidMapBody(const Stmt *body) {
   return true;
 }
 
-bool MapHandler::assignsToArray(const Stmt *stmt, string arr, string index) {
+bool MapHandler::assignsToArray(const Stmt *stmt, 
+  string arr, string index, const BinaryOperator *op) 
+{
   auto s = const_cast<Stmt *>(stmt)->IgnoreImplicit();
-  auto op = dyn_cast<BinaryOperator>(s);
-  if(op) {
+  auto found_op = dyn_cast<BinaryOperator>(s);
+  if(found_op && found_op != op) {
   }
 
   return std::all_of(stmt->child_begin(), stmt->child_end(), 
