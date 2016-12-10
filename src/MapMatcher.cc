@@ -40,7 +40,7 @@ static bool allEqual(vector<string> ss) {
 MapHandler::MapHandler(bool o) : overwrite(o) {}
 
 void MapHandler::run(const MatchFinder::MatchResult &Result) {
-  log(Debug, "Handling Map match result");
+  log(Debug, "Handling Map possible match result");
 
   if(const ForStmt *forS = Result.Nodes.getNodeAs<ForStmt>("for")) {
     vector<string> bindings = { "initVar", "condVar", "incVar" };
@@ -109,11 +109,23 @@ bool MapHandler::assignsToArray(const Stmt *stmt,
   auto s = const_cast<Stmt *>(stmt)->IgnoreImplicit();
   auto found_op = dyn_cast<BinaryOperator>(s);
   if(found_op && found_op != op) {
+    bool assign = found_op->isAssignmentOp();
+    Expr *lhs = found_op->getLHS();
+    
+    auto arrLHS = dyn_cast<ArraySubscriptExpr>(lhs);
+    if(arrLHS) {
+      auto base = dyn_cast<DeclRefExpr>(arrLHS->getBase()->IgnoreImplicit());
+
+      if(base && base->getNameInfo().getAsString() == arr) {
+        log(Debug, "Found an assignment to the target array that isn't the original match");
+        return true;
+      }
+    }
   }
 
-  return std::all_of(stmt->child_begin(), stmt->child_end(), 
-    [](const Stmt *c) { 
-      return true; 
+  return std::any_of(stmt->child_begin(), stmt->child_end(), 
+    [&](const Stmt *c) { 
+      return assignsToArray(c, arr, index, op);
     }
   );
 }
