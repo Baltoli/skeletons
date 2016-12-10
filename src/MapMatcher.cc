@@ -61,6 +61,7 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
     log(Output, successOutputMessage(loc));
     
     addParallelAnnotation(forS->getLocStart(), Result);
+    forS->dumpColor();
   }
 }
 
@@ -71,8 +72,7 @@ void MapHandler::addParallelAnnotation(SourceLocation loc,
   // as long as we are *only* doing simple insertion of text into the source
   // file.
   Rewriter r(*Result.SourceManager, LangOptions());
-  r.InsertText(loc, "// Hello there\n", false, true);
-  r.overwriteChangedFiles();
+  r.InsertText(loc, "#pragma omp parallel for\n", false, true);
 }
 
 StatementMatcher MapHandler::matcher() {
@@ -122,34 +122,17 @@ StatementMatcher MapHandler::loopIncrementMatcher() {
 }
 
 StatementMatcher MapHandler::bodyMatcher() {
-  // TODO: what do we want to match here? and will it need further verification?
-  // Things to think about:
-  //  - Easiest case is DAXPY style array motion calling a single function.
-  //  - From there need to check that the output array is not modified after the
-  //    assignment is made (as otherwise the map properties might not be quite
-  //    right.
-  //  - Extension: how could it be possible to generalise from a direct function
-  //    call to allowing previous work done to be used? Halfway step could be to
-  //    allow anything that doesn't mutate the input or output array (same
-  //    afterwards?)
-  //  - TODO: need to check this further up the road to verify that the op is
-  //    actually an assignment operator
+  // TODO: need to check this further up the road to verify that the op is
+  //       actually an assignment operator
   return (
-    compoundStmt(
-      hasAnySubstatement(
-        binaryOperator(
-          hasLHS(expr()),
-          hasRHS(expr())
-        ).bind("op")
-      )
-    )
-  );
-}
-
-TypeMatcher MapHandler::arrayLikeTypeMatcher() {
-  return anyOf(
-    arrayType(), constantArrayType(), dependentSizedArrayType(),
-    incompleteArrayType(), pointerType(), variableArrayType()
+    compoundStmt(hasAnySubstatement(binaryOperator(
+      hasLHS(ignoringParenImpCasts(
+        arraySubscriptExpr()
+      )),
+      hasRHS(ignoringParenImpCasts(
+        callExpr()
+      ))
+    ).bind("op")))
   );
 }
 
