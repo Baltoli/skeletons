@@ -65,7 +65,7 @@ class MapHandler : public MatchFinder::MatchCallback {
   private:
     void addParallelAnnotation(clang::SourceLocation loc, 
                                const clang::ast_matchers::MatchFinder::MatchResult &Result);
-    bool hasMappableBody(const clang::ForStmt *stmt);
+    bool isValidMapBody(const clang::Stmt *body);
     std::string successOutputMessage(clang::FullSourceLoc loc);
 };
   

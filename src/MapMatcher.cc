@@ -63,12 +63,26 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
+    if(!isValidMapBody(forS->getBody())) {
+      log(Debug, "Near miss for Map: "
+                 "For loop doesn't have a mappable body");
+      return;
+    }
+
     auto loc = Result.Context->getFullLoc(forS->getLocStart());
     log(Output, successOutputMessage(loc));
     
     addParallelAnnotation(forS->getLocStart(), Result);
     forS->dumpColor();
   }
+}
+
+bool MapHandler::isValidMapBody(const Stmt *body) {
+  if(!body) {
+    return true;
+  }
+
+  return false;
 }
 
 void MapHandler::addParallelAnnotation(SourceLocation loc, 
