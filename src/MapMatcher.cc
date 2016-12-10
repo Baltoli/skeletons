@@ -132,8 +132,24 @@ StatementMatcher MapHandler::bodyMatcher() {
   //    call to allowing previous work done to be used? Halfway step could be to
   //    allow anything that doesn't mutate the input or output array (same
   //    afterwards?)
+  //  - TODO: need to check this further up the road to verify that the op is
+  //    actually an assignment operator
   return (
-    stmt()
+    compoundStmt(
+      hasAnySubstatement(
+        binaryOperator(
+          hasLHS(expr()),
+          hasRHS(expr())
+        ).bind("op")
+      )
+    )
+  );
+}
+
+TypeMatcher MapHandler::arrayLikeTypeMatcher() {
+  return anyOf(
+    arrayType(), constantArrayType(), dependentSizedArrayType(),
+    incompleteArrayType(), pointerType(), variableArrayType()
   );
 }
 

@@ -62,6 +62,13 @@ class MapHandler : public MatchFinder::MatchCallback {
      *  - TODO
      */
     StatementMatcher bodyMatcher();
+
+    /**
+     * Clang AST matcher that matches any type that could be used as an input or
+     * output to a map operation (for example, a pointer type, an array type,
+     * etc.)
+     */
+    TypeMatcher arrayLikeTypeMatcher();
   private:
     void addParallelAnnotation(clang::SourceLocation loc, 
                                const clang::ast_matchers::MatchFinder::MatchResult &Result);
