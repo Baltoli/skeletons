@@ -127,7 +127,12 @@ StatementMatcher MapHandler::bodyMatcher() {
   return (
     compoundStmt(hasAnySubstatement(binaryOperator(
       hasLHS(ignoringParenImpCasts(
-        arraySubscriptExpr()
+        arraySubscriptExpr(
+          hasBase(ignoringParenImpCasts(
+              declRefExpr().bind("target"))),
+          hasIndex(ignoringParenImpCasts(
+              declRefExpr(hasDeclaration(equalsBoundNode("incVar")))))
+        )
       )),
       hasRHS(ignoringParenImpCasts(
         callExpr()
