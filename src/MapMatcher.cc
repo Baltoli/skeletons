@@ -78,6 +78,9 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
 }
 
 bool MapHandler::isValidMapBody(const Stmt *body) {
+  // If the loop body is empty, then no harm done in marking it as parallel,
+  // though there *should* be no way to actually trigger this behaviour in real
+  // execution because of AST matching.
   if(!body) {
     return true;
   }
