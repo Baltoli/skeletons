@@ -95,9 +95,25 @@ bool MapHandler::isValidMapBody(const Stmt *body) {
     // body as being mappable:
     //  - Assigning to anything in the source, at any point
     //  - Assigning to the target at an offset that *isn't* the loop index
+    if(assignsToArray(stmt, "x", "i")) {
+      return false;
+    }
   }
 
   return true;
+}
+
+bool MapHandler::assignsToArray(const Stmt *stmt, string arr, string index) {
+  auto s = const_cast<Stmt *>(stmt)->IgnoreImplicit();
+  auto op = dyn_cast<BinaryOperator>(s);
+  if(op) {
+  }
+
+  return std::all_of(stmt->child_begin(), stmt->child_end(), 
+    [](const Stmt *c) { 
+      return true; 
+    }
+  );
 }
 
 void MapHandler::addParallelAnnotation(SourceLocation loc, 
