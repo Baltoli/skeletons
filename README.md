@@ -67,6 +67,7 @@ detecting this skeleton in source code are demonstrated by this code sample:
       // ... code after
     }
 
-This is not currently a safe analysis to make; the before or after code could in
-fact be breaking the map invariant. Some work will be done on ensuring that this
-cannot happen.
+The before and after code is checked to ensure that there are no other
+assignments to the target (at *any* index) - if there are, the loop will not be
+annotated, and a near miss reported. This is obviously overly strong, but as a
+first analysis it's OK.
