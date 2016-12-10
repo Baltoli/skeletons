@@ -63,7 +63,8 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    if(!isValidMapBody(forS->getBody(), op)) {
+    auto target = Result.Nodes.getNodeAs<DeclRefExpr>("target")->getNameInfo().getAsString();
+    if(!isValidMapBody(forS->getBody(), op, target)) {
       log(Debug, "Near miss for Map: "
                  "For loop doesn't have a mappable body");
       return;
@@ -76,7 +77,8 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
   }
 }
 
-bool MapHandler::isValidMapBody(const Stmt *body, const BinaryOperator *op) {
+bool MapHandler::isValidMapBody(const Stmt *body, 
+                                const BinaryOperator *op, string target) {
   // If the loop body is empty, then no harm done in marking it as parallel,
   // though there *should* be no way to actually trigger this behaviour in real
   // execution because of AST matching.
@@ -95,7 +97,7 @@ bool MapHandler::isValidMapBody(const Stmt *body, const BinaryOperator *op) {
     // body as being mappable:
     //  - Assigning to anything in the source, at any point
     //  - Assigning to the target at an offset that *isn't* the loop index
-    if(assignsToArray(stmt, "x", "i", op)) {
+    if(assignsToArray(stmt, target, op)) {
       return false;
     }
   }
@@ -103,9 +105,7 @@ bool MapHandler::isValidMapBody(const Stmt *body, const BinaryOperator *op) {
   return true;
 }
 
-bool MapHandler::assignsToArray(const Stmt *stmt, 
-  string arr, string index, const BinaryOperator *op) 
-{
+bool MapHandler::assignsToArray(const Stmt *stmt, string target, const BinaryOperator *op) {
   auto s = const_cast<Stmt *>(stmt)->IgnoreImplicit();
   auto found_op = dyn_cast<BinaryOperator>(s);
   if(found_op && found_op != op) {
@@ -116,7 +116,7 @@ bool MapHandler::assignsToArray(const Stmt *stmt,
     if(arrLHS) {
       auto base = dyn_cast<DeclRefExpr>(arrLHS->getBase()->IgnoreImplicit());
 
-      if(base && base->getNameInfo().getAsString() == arr) {
+      if(assign && base && base->getNameInfo().getAsString() == target) {
         log(Debug, "Found an assignment to the target array that isn't the original match");
         return true;
       }
@@ -125,7 +125,7 @@ bool MapHandler::assignsToArray(const Stmt *stmt,
 
   return std::any_of(stmt->child_begin(), stmt->child_end(), 
     [&](const Stmt *c) { 
-      return assignsToArray(c, arr, index, op);
+      return assignsToArray(c, target, op);
     }
   );
 }
