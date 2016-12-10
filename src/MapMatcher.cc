@@ -107,6 +107,8 @@ void MapHandler::addParallelAnnotation(SourceLocation loc,
   // as long as we are *only* doing simple insertion of text into the source
   // file.
   if(overwrite) {
+    log(Debug, "Adding OpenMP annotation for discovered Map");
+
     Rewriter r(*Result.SourceManager, LangOptions());
     r.InsertText(loc, "#pragma omp parallel for\n", false, true);
     r.overwriteChangedFiles();
