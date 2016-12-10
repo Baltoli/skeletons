@@ -85,7 +85,20 @@ bool MapHandler::isValidMapBody(const Stmt *body) {
     return true;
   }
 
-  return false;
+  auto compound = dyn_cast<CompoundStmt>(body);
+  if(!compound) {
+    log(Error, "For loop without compound body - why?");
+    return false;
+  }
+
+  for(auto stmt : compound->body()) {
+    // TODO: work out what we need to check here to rule out a particular loop
+    // body as being mappable:
+    //  - Assigning to anything in the source, at any point
+    //  - Assigning to the target at an offset that *isn't* the loop index
+  }
+
+  return true;
 }
 
 void MapHandler::addParallelAnnotation(SourceLocation loc, 
