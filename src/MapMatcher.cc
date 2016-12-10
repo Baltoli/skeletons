@@ -37,7 +37,7 @@ static bool allEqual(vector<string> ss) {
 
 }
 
-MapHandler::MapHandler() {}
+MapHandler::MapHandler(bool o) : overwrite(o) {}
 
 void MapHandler::run(const MatchFinder::MatchResult &Result) {
   log(Debug, "Handling Map match result");
@@ -73,7 +73,6 @@ void MapHandler::run(const MatchFinder::MatchResult &Result) {
     log(Output, successOutputMessage(loc));
     
     addParallelAnnotation(forS->getLocStart(), Result);
-    forS->dumpColor();
   }
 }
 
@@ -107,8 +106,11 @@ void MapHandler::addParallelAnnotation(SourceLocation loc,
   // TODO: Is an empty LangOptions OK here? My instinct is that it probably is
   // as long as we are *only* doing simple insertion of text into the source
   // file.
-  Rewriter r(*Result.SourceManager, LangOptions());
-  r.InsertText(loc, "#pragma omp parallel for\n", false, true);
+  if(overwrite) {
+    Rewriter r(*Result.SourceManager, LangOptions());
+    r.InsertText(loc, "#pragma omp parallel for\n", false, true);
+    r.overwriteChangedFiles();
+  }
 }
 
 StatementMatcher MapHandler::matcher() {

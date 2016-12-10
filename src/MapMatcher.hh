@@ -8,7 +8,7 @@ using namespace clang::ast_matchers;
 
 class MapHandler : public MatchFinder::MatchCallback {
   public:
-    MapHandler();
+    MapHandler(bool overwrite);
 
     /**
      * Callback method that is run when we match a result in the AST.
@@ -67,6 +67,7 @@ class MapHandler : public MatchFinder::MatchCallback {
                                const clang::ast_matchers::MatchFinder::MatchResult &Result);
     bool isValidMapBody(const clang::Stmt *body);
     std::string successOutputMessage(clang::FullSourceLoc loc);
+    bool overwrite;
 };
   
 

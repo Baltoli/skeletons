@@ -2,7 +2,9 @@
 
 #include "DetectSkeletonsASTConsumer.hh"
 
-DetectSkeletonsASTConsumer::DetectSkeletonsASTConsumer() {
+DetectSkeletonsASTConsumer::DetectSkeletonsASTConsumer(bool overwrite) :
+  mapHandler(overwrite)
+{
   Matcher.addMatcher(mapHandler.matcher(), &mapHandler);
 }
 

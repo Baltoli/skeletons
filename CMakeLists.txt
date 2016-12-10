@@ -73,9 +73,11 @@ include_directories(
 add_llvm_executable(skel
   src/main.cc
   src/DetectSkeletonsAction.cc
+  src/AnnotateSkeletonsAction.cc
   src/DetectSkeletonsASTConsumer.cc
   src/MapMatcher.cc
-  src/Log.cc)
+  src/Log.cc
+)
 foreach(i
 	Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse
         Rewrite Sema Serialization Tooling
