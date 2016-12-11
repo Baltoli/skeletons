@@ -201,19 +201,6 @@ StatementMatcher MapHandler::bodyMatcher() {
           hasIndex(ignoringParenImpCasts(
               declRefExpr(hasDeclaration(equalsBoundNode("incVar")))))
         )
-      )),
-      hasRHS(ignoringParenImpCasts(
-        callExpr(
-          argumentCountIs(1),
-          hasArgument(0,
-            arraySubscriptExpr(
-              hasBase(ignoringParenImpCasts(
-                declRefExpr().bind("source"))),
-              hasIndex(ignoringParenImpCasts(
-                declRefExpr(hasDeclaration(equalsBoundNode("incVar")))))
-            )
-          )
-        )
       ))
     ).bind("op")))
   );
