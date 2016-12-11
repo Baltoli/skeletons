@@ -106,6 +106,10 @@ bool MapHandler::isValidMapBody(const Stmt *body,
 }
 
 bool MapHandler::assignsToArray(const Stmt *stmt, string target, const BinaryOperator *op) {
+  if(!stmt) {
+    return false;
+  }
+
   auto s = const_cast<Stmt *>(stmt)->IgnoreImplicit();
   auto found_op = dyn_cast<BinaryOperator>(s);
   if(found_op && found_op != op) {
