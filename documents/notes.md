@@ -44,3 +44,5 @@ something I can detect in a way similar to the map matcher.
 
   * Code very rarely assigns directly to an array or pointer index. A lot of the
     time, the assignment is done through a layer of indirection.
+  * GNU code seems to have an aversion to inline for loop variables (as the code
+    was probably written before 1999!).
