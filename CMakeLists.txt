@@ -80,6 +80,7 @@ add_llvm_executable(skel
   src/MapMatcher.cc
   src/DynamicHandler.cc
   src/Log.cc
+  src/Common.cc
 )
 foreach(i
 	Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse
