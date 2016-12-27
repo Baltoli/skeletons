@@ -7,7 +7,9 @@
 using namespace clang::ast_matchers;
 
 class DynamicHandler : public MatchFinder::MatchCallback {
-  virtual void run(const MatchFinder::MatchResult &Result);
+  public:
+    virtual void run(const MatchFinder::MatchResult &Result);
+    StatementMatcher matcher();
 };
 
 #endif
