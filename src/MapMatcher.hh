@@ -8,7 +8,7 @@ using namespace clang::ast_matchers;
 
 class MapHandler : public MatchFinder::MatchCallback {
   public:
-    MapHandler();
+    MapHandler(bool overwrite);
 
     /**
      * Callback method that is run when we match a result in the AST.
@@ -53,6 +53,24 @@ class MapHandler : public MatchFinder::MatchCallback {
      *  - Pre or post increment the variable defined in the initializer
      */
     StatementMatcher loopIncrementMatcher();
+
+    /**
+     * Clang AST matcher that matches the body of a for-loop that could be a
+     * mappable operation.
+     *
+     * This will match bodies that:
+     *  - TODO
+     */
+    StatementMatcher bodyMatcher();
+  private:
+    void addParallelAnnotation(clang::SourceLocation loc, 
+                               const clang::ast_matchers::MatchFinder::MatchResult &Result);
+    bool isValidMapBody(const clang::Stmt *body, const clang::BinaryOperator *op,
+                        std::string target);
+    bool assignsToArray(const clang::Stmt *stmt, 
+                        std::string target, const clang::BinaryOperator *op);
+    std::string successOutputMessage(clang::FullSourceLoc loc);
+    bool overwrite;
 };
   
 

@@ -14,6 +14,8 @@ class DetectSkeletonsAction : public ASTFrontendAction {
   public:
     DetectSkeletonsAction();
     unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef InFile);
+  protected:
+    bool overwrite;
 };
 
 #endif

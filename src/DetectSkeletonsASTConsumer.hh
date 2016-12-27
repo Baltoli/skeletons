@@ -8,7 +8,7 @@
 using namespace clang;
 class DetectSkeletonsASTConsumer : public ASTConsumer {
   public:
-    DetectSkeletonsASTConsumer();
+    DetectSkeletonsASTConsumer(bool overwrite);
     void HandleTranslationUnit(ASTContext &context);
 
   private:

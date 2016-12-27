@@ -1,6 +1,6 @@
 # Progress Notes
 
-# Initial Experiments & Motivation
+## Initial Experiments & Motivation
 
 As is intuitive, it's very hard to actually achieve a speedup by using a naive
 OpenMP pragma on a for loop. In some cases it does seem to be possible, but a
@@ -21,7 +21,29 @@ which doesn't have ideal concurrency characteristics, when performing more work
 than a trivial multiplication (on a big enough data set!), the parallel version
 is faster.
 
-# New Ideas
+## Discovering Maps
+
+People don't write code like this in real life. Most useful outcome is that I
+know how to write a clang tool!
+
+In light of this, my next step will be to read through some of the source of the
+GNU Scientific Library to identify more "real-world" patterns in heavily
+numerical code.
+
+GSL picked for a number of reasons:
+
+  * CMake available for building (so I can very easily make a compilation
+    database).
+  * Large enough code base that patterns I'm looking for are likely to occur
+    somewhere (hopefully).
+
+New approach - find some patterns in the code base that can be generalised into
+something I can detect in a way similar to the map matcher.
+
+### GSL Findings
+
+  * Code very rarely assigns directly to an array or pointer index. A lot of the
+    time, the assignment is done through a layer of indirection.
 
 ## Dynamic Analysis
 
@@ -38,7 +60,7 @@ parallel instances.
 Then aim to implement dynamic analyses that do a similar job but better in some
 way, and compare them to the limited static approach.
 
-## Commutativity
+### Commutativity
 
 Idea is to check whether iterations of a loop can be reordered safely - if they
 can, then it's likely that the loop can be parallelised safely. This is a

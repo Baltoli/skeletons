@@ -3,10 +3,10 @@
 
 using std::unique_ptr;
 
-DetectSkeletonsAction::DetectSkeletonsAction() {}
+DetectSkeletonsAction::DetectSkeletonsAction() : overwrite(false) {}
 
 unique_ptr<ASTConsumer> DetectSkeletonsAction::CreateASTConsumer(CompilerInstance &CI, 
                                                                  StringRef InFile) 
 {
-  return unique_ptr<ASTConsumer>(new DetectSkeletonsASTConsumer);
+  return unique_ptr<ASTConsumer>(new DetectSkeletonsASTConsumer(overwrite));
 }

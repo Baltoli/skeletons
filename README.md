@@ -32,6 +32,42 @@ Prerequisites:
 
   * Clang and LLVM built and installed from source somewhere - I think the LLVM
     discovery module for CMake should pick it up from there.
-  * `clang-omp` installed - on mac OS this can be done using homebrew.
+
+    mkdir Build
+    cd Build
+    cmake ..
+    make
 
 ## Usage
+
+The project is implemented as a Clang tool, and so can make use of _compilation
+databases_ if necessary. To run the tool on a single source file that doesn't
+need any complex build flags to be compiled:
+
+    skel filename --
+
+Eventually `skel` will be set up to automatically annotate source files with
+OpenMP pragmas that allow for parallel execution. For now, successes are
+reported on `stdout` with line numbers marking where a match has been found, and
+errors and debug messages go to `stderr`.
+
+## Implemented Skeletons
+
+These are the skeletal shapes that can currently be detected by `skel`.
+
+### Map
+
+A map skeleton takes a function `f` and applies it to every element of an input
+array, copying the results into another array. The current criteria for
+detecting this skeleton in source code are demonstrated by this code sample:
+
+    for(int i = 0; i < N; i++) {
+      // ... code before
+      target[i] = func(source[i]);
+      // ... code after
+    }
+
+The before and after code is checked to ensure that there are no other
+assignments to the target (at *any* index) - if there are, the loop will not be
+annotated, and a near miss reported. This is obviously overly strong, but as a
+first analysis it's OK.
