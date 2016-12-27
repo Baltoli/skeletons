@@ -76,6 +76,7 @@ add_llvm_executable(skel
   src/DetectDynamicAction.cc
   src/AnnotateSkeletonsAction.cc
   src/DetectSkeletonsASTConsumer.cc
+  src/DetectDynamicASTConsumer.cc
   src/MapMatcher.cc
   src/Log.cc
 )

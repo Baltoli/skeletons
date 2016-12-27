@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "DetectSkeletonsASTConsumer.hh"
 
 DetectSkeletonsASTConsumer::DetectSkeletonsASTConsumer(bool overwrite) :
