@@ -184,3 +184,21 @@ to the loop variable or to the bound condition (if it is indeed a variable).
 If the loop meets these conditions, then we should add a fixed comment above it
 in the source file (e.g. "LOOP-ORDER: CHECK"). This will act as a marker for
 future runs of the tool (so that they can know which loops to analyse).
+
+In the future it might be nice to look at whether the work on for loops that is
+shared between the static analyser and the reorderable loop finder could be
+shared rather than duplicated. For now I think it's fine as they're doing
+conceptually different things and might have differing implementations in the
+future.
+
+Currently the reorderable finder discovers loops that have the for loop
+conditions discussed previously. The static analysis for "no writes to loop
+variable or bounds" might not actually be necessary - changing these in a loop
+iteration is likely to just break things anyway, and if it doesn't then the
+dynamic analysis has discovered a case that static analysis would have discarded
+by being too conservative!
+
+This should be a key point in the writeup I think - it might be tempting to
+implement static analyses because they seem conceptually simple or innocent, but
+if time is not a concern, then you might as well dynamically analyse them (for
+the reasons discussed above).
