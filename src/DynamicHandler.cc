@@ -1,6 +1,8 @@
 #include "DynamicHandler.hh"
+#include "Log.hh"
 
 void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
+  log(Debug, "Handling possible reorderable loop");
 }
 
 StatementMatcher DynamicHandler::matcher() {
