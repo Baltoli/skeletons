@@ -161,3 +161,26 @@ process.
 Alternative is to start off with this being a mostly manual process, and if
 there's time, convert it to a more automated version using CMake. This might be
 the better idea for now.
+
+### Implementation Strategy
+
+First part is quite similar to the existing static analysis component. We want
+to identify for loops that have a "simple" structure. This will probably be best
+done by a Clang AST matcher that is less strict than the map matcher. The result
+of this step could be simply to annotate the source files with a comment above
+loops that should be tested using the next steps in the procedure.
+
+What do potentially reorderable loops look like? The bulk of the decision is
+done on the init, condition and increments. These should be:
+* Init: needs to initialise a variable to a constant value (that might not be
+  zero). Don't support variable initialisation values for now.
+* Condition: should check that the same variable as declared in the initialiser
+  is being compared to some fixed value (variable or constant).
+* Increment: ++ on the same variable as the other two.
+
+As well as these, we also need to check that the body of the loop doesn't write
+to the loop variable or to the bound condition (if it is indeed a variable).
+
+If the loop meets these conditions, then we should add a fixed comment above it
+in the source file (e.g. "LOOP-ORDER: CHECK"). This will act as a marker for
+future runs of the tool (so that they can know which loops to analyse).
