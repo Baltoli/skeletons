@@ -16,13 +16,36 @@ StatementMatcher DynamicHandler::forLoopMatcher() {
 }
 
 StatementMatcher DynamicHandler::initMatcher() {
-  return stmt();
+  return (
+    declStmt(hasSingleDecl(
+      varDecl(
+        hasInitializer(ignoringParenImpCasts(integerLiteral()))
+      ).bind("initVar")
+    ))
+  );
 }
 
 StatementMatcher DynamicHandler::conditionMatcher() {
-  return expr();
+  return (
+    binaryOperator(
+      hasOperatorName("<"),
+      hasLHS(ignoringParenImpCasts(
+        declRefExpr(to(varDecl(hasType(isInteger())).bind("condVar")))
+      )),
+      hasRHS(ignoringParenImpCasts(
+        expr(hasType(isInteger()))
+      ))
+    )
+  );
 }
 
 StatementMatcher DynamicHandler::incrementMatcher() {
-  return stmt();
+  return (
+    unaryOperator(
+      hasOperatorName("++"),
+      hasUnaryOperand(ignoringParenImpCasts(
+        declRefExpr(to(varDecl(hasType(isInteger())).bind("incVar")))
+      ))
+    )
+  );
 }
