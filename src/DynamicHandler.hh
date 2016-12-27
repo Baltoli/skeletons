@@ -10,6 +10,11 @@ class DynamicHandler : public MatchFinder::MatchCallback {
   public:
     virtual void run(const MatchFinder::MatchResult &Result);
     StatementMatcher matcher();
+  private:
+    StatementMatcher forLoopMatcher();
+    StatementMatcher initMatcher();
+    StatementMatcher conditionMatcher();
+    StatementMatcher incrementMatcher();
 };
 
 #endif
