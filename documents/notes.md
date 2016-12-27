@@ -134,3 +134,28 @@ the outputs.
 If the script finds that the programs behave identically under the conditions
 given, then the tool can be used in another mode (with an extra input indicating
 the loop to be annotated?) to actually perform the optimisation.
+
+The system being built here will be composed of more than a Clang tool to do the
+discovery of loops. It will also require:
+* Some way of programatically recompiling a program with a single source file
+  replaced by reordered variants. This should be reasonably easy to achieve if
+  using CMake to do the compilation. However, it might be trickier if the loop
+  being parallelised is in library code (e.g. GSL).
+* Method for comparing the output of programs to see if they are equivalent
+  (this can probably just be a shell script that runs them all and does naive
+  comparison on the outputs).
+* Clang tool will need to do both loop discovery and annotation.
+* The loop discovery phase will need to output a file that gives the location
+  within the file that a potential candidate loop has been found.
+* The source file will need to have some kind of annotations added to signify
+  that a particular loop has already been looked at and does not need to be
+  analysed again.
+
+Something to think about - this process means that source files are being
+generated as part of the build process. Will probably need some CMake
+shenanigans to note which are to be analysed in this way as part of the build
+process.
+
+Alternative is to start off with this being a mostly manual process, and if
+there's time, convert it to a more automated version using CMake. This might be
+the better idea for now.
