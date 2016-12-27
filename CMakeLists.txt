@@ -78,6 +78,7 @@ add_llvm_executable(skel
   src/DetectSkeletonsASTConsumer.cc
   src/DetectDynamicASTConsumer.cc
   src/MapMatcher.cc
+  src/DynamicHandler.cc
   src/Log.cc
 )
 foreach(i
