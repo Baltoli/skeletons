@@ -73,6 +73,7 @@ include_directories(
 add_llvm_executable(skel
   src/main.cc
   src/DetectSkeletonsAction.cc
+  src/DetectDynamicAction.cc
   src/AnnotateSkeletonsAction.cc
   src/DetectSkeletonsASTConsumer.cc
   src/MapMatcher.cc
