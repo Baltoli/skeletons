@@ -2,6 +2,8 @@
 #include "DynamicHandler.hh"
 #include "Log.hh"
 
+#include <clang/Rewrite/Core/Rewriter.h>
+
 using namespace clang;
 using namespace clang::ast_matchers;
 
@@ -24,6 +26,13 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
                  "For loop referencing different variables");
       return;
     }
+
+    log(Debug, "Adding comment annotation for reorderable loop");
+
+    auto loc = Result.Context->getFullLoc(forS->getLocStart());
+    Rewriter r(*Result.SourceManager, LangOptions());
+    r.InsertText(loc, "// LOOP-ORDER\n", false, true);
+    r.overwriteChangedFiles();
   }
 }
 
