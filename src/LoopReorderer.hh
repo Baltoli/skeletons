@@ -21,10 +21,12 @@ struct Strategy {
 
 class LoopReorderer {
   public:
-    LoopReorderer(Strategy s) : strategy(s) {}
+    LoopReorderer(Strategy s, clang::ASTContext &c) : 
+      strategy(s), context(c) {}
     std::string transform(const clang::ForStmt *stmt);
   private:
     Strategy strategy;
+    clang::ASTContext &context;
 };
 
 #endif

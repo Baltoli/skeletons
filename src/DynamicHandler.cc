@@ -31,7 +31,7 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
     log(Debug, "Found reorderable loop");
 
     Rewriter r(*Result.SourceManager, LangOptions());
-    LoopReorderer lro(Strategy::Reverse);
+    LoopReorderer lro(Strategy::Reverse, *Result.Context);
     string newSource = lro.transform(forS);
 
     r.ReplaceText(forS->getSourceRange(), newSource);
