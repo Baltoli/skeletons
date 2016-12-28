@@ -27,12 +27,7 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
-    log(Debug, "Adding comment annotation for reorderable loop");
-
-    auto loc = Result.Context->getFullLoc(forS->getLocStart());
-    Rewriter r(*Result.SourceManager, LangOptions());
-    r.InsertText(loc, "// LOOP-ORDER\n", false, true);
-    r.overwriteChangedFiles();
+    log(Debug, "Found reorderable loop");
   }
 }
 
@@ -50,11 +45,20 @@ StatementMatcher DynamicHandler::forLoopMatcher() {
 
 StatementMatcher DynamicHandler::initMatcher() {
   return (
-    declStmt(hasSingleDecl(
-      varDecl(
-        hasInitializer(ignoringParenImpCasts(integerLiteral()))
-      ).bind("initVar")
-    ))
+    anyOf(
+      declStmt(hasSingleDecl(
+        varDecl(
+          hasInitializer(ignoringParenImpCasts(integerLiteral()))
+        ).bind("initVar")
+      )),
+      binaryOperator(
+        hasOperatorName("="),
+        hasLHS(ignoringParenImpCasts(
+          declRefExpr(to(varDecl(hasType(isInteger())).bind("initVar")))
+        )),
+        hasRHS(ignoringParenImpCasts(integerLiteral()))
+      )
+    )
   );
 }
 
