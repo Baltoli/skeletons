@@ -1,6 +1,7 @@
 #include "Common.hh"
 #include "DynamicHandler.hh"
 #include "Log.hh"
+#include "LoopReorderer.hh"
 
 #include <clang/Rewrite/Core/Rewriter.h>
 
@@ -30,7 +31,10 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
     log(Debug, "Found reorderable loop");
 
     Rewriter r(*Result.SourceManager, LangOptions());
-    //r.ReplaceText(forS->getSourceRange(), "");
+    LoopReorderer lro(Strategy::Reverse);
+    string newSource = lro.transform(forS);
+
+    r.ReplaceText(forS->getSourceRange(), newSource);
     r.overwriteChangedFiles();
   }
 }
