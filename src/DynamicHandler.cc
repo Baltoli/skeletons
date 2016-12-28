@@ -28,6 +28,10 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
     }
 
     log(Debug, "Found reorderable loop");
+
+    Rewriter r(*Result.SourceManager, LangOptions());
+    //r.ReplaceText(forS->getSourceRange(), "");
+    r.overwriteChangedFiles();
   }
 }
 
