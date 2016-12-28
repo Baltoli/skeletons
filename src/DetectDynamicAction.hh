@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <clang/Frontend/FrontendActions.h>
 #include <clang/AST/ASTConsumer.h>
+#include <clang/Frontend/FrontendActions.h>
 
 using namespace llvm;
 using namespace clang;
