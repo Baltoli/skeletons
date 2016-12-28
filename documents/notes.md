@@ -202,3 +202,33 @@ This should be a key point in the writeup I think - it might be tempting to
 implement static analyses because they seem conceptually simple or innocent, but
 if time is not a concern, then you might as well dynamically analyse them (for
 the reasons discussed above).
+
+Might actually need a more general approach. Let's try relaxing static loop
+discovery constraints one by one until we start to find things in GSL that we
+can apply the analysis to reasonably.
+
+Coding style problem that might be good to write up - I have been implicitly
+going by C99 style where variables are initialised inline with the for loop.
+This does not always hold in legacy code, and we should be sensitive to this.
+
+Now need to work out what the best way will actually be when "passing back" the
+loops that need to be annotated. Options are:
+* Just do the reordering there and then
+  * Advantages:
+    * Simpler code, as we already have references to the `ForStmt` etc. Can just
+      do in-place copying of code blocks with mutated arguments.
+  * Disadvantages:
+    * Tool becomes more strongly coupled. Thinking about it, this might actually
+      be OK.
+
+Now that I look at it, doing the modifications in place will probably be the
+better option (rather than marking with something for future reference).
+
+Clang tools don't seem to have a convenient interface for copying a file rather
+than doing destructive edits. Let's run with that as the interface, and use a
+script to drive the copying of files (to keep the Clang tool code as simple as
+possible). Will need to have a way of using CL flags to specify the loop
+reordering strategy to be run on loops found.
+
+The script will then be able to copy the source file several times, then run the
+rewriter on each one individually.
