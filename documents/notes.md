@@ -232,3 +232,16 @@ reordering strategy to be run on loops found.
 
 The script will then be able to copy the source file several times, then run the
 rewriter on each one individually.
+
+So Clang provides Tree Transformations to allow an AST to be transformed. This
+looks like what we want to be doing (rather than hacking together an ad-hoc
+method).
+
+Seems to be a very great deal of Clang gymnastics needed to actually use the
+tree transform utilities. Why not try to do this as a source to source
+transformation? Have a method somewhere that takes a ForStmt and returns a
+string representing the reordered loop. Can then use the replace methods to slot
+this in instead of the actual loop.
+
+In the very long term this is almost certainly a worse approach, but it ought to
+work in this case.
