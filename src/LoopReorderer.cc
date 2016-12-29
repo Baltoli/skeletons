@@ -36,5 +36,12 @@ string LoopReorderer::identity(Loop loop) {
 }
 
 string LoopReorderer::reverse(Loop loop) {
-  return "";
+  stringstream st;
+  st << "for ("
+     << loop.loopVariable << " = "
+     << loop.bound << " - 1;"
+     << loop.loopVariable << " >= 0;"
+     << loop.loopVariable << "--)"
+     << code(loop.stmt->getBody());
+  return st.str();
 }
