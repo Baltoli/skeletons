@@ -4,6 +4,7 @@
 #include <string>
 
 #include <clang/AST/AST.h>
+#include <llvm/Support/raw_ostream.h>
 
 struct Strategy {
   public:
@@ -27,6 +28,8 @@ class LoopReorderer {
   private:
     Strategy strategy;
     clang::ASTContext &context;
+    std::string code(const clang::Stmt *stmt);
+    std::string reverse(const clang::ForStmt *stmt);
 };
 
 #endif
