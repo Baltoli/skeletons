@@ -82,6 +82,7 @@ add_llvm_executable(skel
   src/Log.cc
   src/Common.cc
   src/LoopReorderer.cc
+  src/Loop.cc
 )
 foreach(i
 	Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse

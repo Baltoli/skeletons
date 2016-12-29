@@ -1,3 +1,4 @@
+#include "Log.hh"
 #include "LoopReorderer.hh"
 
 #include <sstream>
@@ -10,21 +11,27 @@ using namespace llvm;
 string LoopReorderer::code(const Stmt *stmt) {
   string out;
   raw_string_ostream stream(out);
-  stmt->printPretty(stream, nullptr, PrintingPolicy(context.getLangOpts()));
+
+  if(stmt) {
+    stmt->printPretty(stream, nullptr, PrintingPolicy(context.getLangOpts()));
+  }
+
   return out;
 }
 
-string LoopReorderer::transform(const ForStmt *stmt) {
+string LoopReorderer::transform(Loop loop) {
   switch(strategy) {
     case Strategy::Reverse:
-      return reverse(stmt);
+      return reverse(loop);
     default:
-      return identity(stmt);
+      return identity(loop);
   }
 }
 
-string LoopReorderer::identity(const ForStmt *stmt) {
+string LoopReorderer::identity(Loop loop) {
+  auto stmt = loop.stmt;
   stringstream st;
+
   st << "for ("
      << code(stmt->getInit())
      << code(stmt->getCond()) << "; "
@@ -33,6 +40,33 @@ string LoopReorderer::identity(const ForStmt *stmt) {
   return st.str();
 }
 
-string LoopReorderer::reverse(const ForStmt *stmt) {
-  return "";
+string LoopReorderer::reverse(Loop loop) {
+  stringstream st;
+  st << "for ("
+     << loop.var << " = "
+     << code(loop.bound) << " - 1;"
+     << loop.var << reverseComparison(comparisonOp(loop.stmt->getCond())) 
+     << code(loop.init) << "; "
+     << loop.var << "--)"
+     << code(loop.stmt->getBody());
+  return st.str();
+}
+
+string LoopReorderer::comparisonOp(const Expr *e) {
+  auto binop = dyn_cast<BinaryOperator>(e);
+  return BinaryOperator::getOpcodeStr(binop->getOpcode());
+}
+
+int LoopReorderer::reverseBound(string cmp) {
+  if(cmp == "<") return 1;
+  if(cmp == "<=") return 0;
+
+  log(Debug, "Unknown comparison operator when reversing loop: " + cmp);
+
+  return 0;
+}
+
+string LoopReorderer::reverseComparison(string cmp) {
+  // TODO: implement other direction
+  return ">=";
 }

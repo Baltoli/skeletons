@@ -2,6 +2,7 @@
 #include "DynamicHandler.hh"
 #include "Flags.hh"
 #include "Log.hh"
+#include "Loop.hh"
 #include "LoopReorderer.hh"
 
 #include <clang/Rewrite/Core/Rewriter.h>
@@ -29,11 +30,24 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
+    const Stmt *init = Result.Nodes.getNodeAs<Stmt>("init");
+    if(!init) {
+      log(Debug, "No initialiser for reorderable loop");
+      return;
+    }
+
+    const Stmt *bound = Result.Nodes.getNodeAs<Stmt>("bound");
+    if(!bound) {
+      log(Debug, "No bound for reorderable loop");
+      return;
+    }
+
     log(Debug, "Found reorderable loop");
 
     Rewriter r(*Result.SourceManager, LangOptions());
     LoopReorderer lro(StrategyFlag, *Result.Context);
-    string newSource = lro.transform(forS);
+    Loop loop(forS, bindings[0], init, bound);
+    string newSource = lro.transform(loop);
 
     r.ReplaceText(forS->getSourceRange(), newSource);
     r.overwriteChangedFiles();
@@ -57,7 +71,7 @@ StatementMatcher DynamicHandler::initMatcher() {
     anyOf(
       declStmt(hasSingleDecl(
         varDecl(
-          hasInitializer(ignoringParenImpCasts(integerLiteral()))
+          hasInitializer(ignoringParenImpCasts(integerLiteral().bind("init")))
         ).bind("initVar")
       )),
       binaryOperator(
@@ -65,7 +79,7 @@ StatementMatcher DynamicHandler::initMatcher() {
         hasLHS(ignoringParenImpCasts(
           declRefExpr(to(varDecl(hasType(isInteger())).bind("initVar")))
         )),
-        hasRHS(ignoringParenImpCasts(integerLiteral()))
+        hasRHS(ignoringParenImpCasts(integerLiteral().bind("init")))
       )
     )
   );
@@ -79,7 +93,7 @@ StatementMatcher DynamicHandler::conditionMatcher() {
         declRefExpr(to(varDecl(hasType(isInteger())).bind("condVar")))
       )),
       hasRHS(ignoringParenImpCasts(
-        expr(hasType(isInteger()))
+        expr(hasType(isInteger())).bind("bound")
       ))
     )
   );

@@ -6,6 +6,8 @@
 #include <clang/AST/AST.h>
 #include <llvm/Support/raw_ostream.h>
 
+#include "Loop.hh"
+
 struct Strategy {
   public:
     enum Type {
@@ -25,13 +27,16 @@ class LoopReorderer {
   public:
     LoopReorderer(Strategy s, clang::ASTContext &c) : 
       strategy(s), context(c) {}
-    std::string transform(const clang::ForStmt *stmt);
+    std::string transform(Loop loop);
   private:
     Strategy strategy;
     clang::ASTContext &context;
     std::string code(const clang::Stmt *stmt);
-    std::string identity(const clang::ForStmt *stmt);
-    std::string reverse(const clang::ForStmt *stmt);
+    std::string identity(Loop loop);
+    std::string reverse(Loop loop);
+    std::string comparisonOp(const clang::Expr *e);
+    int reverseBound(std::string cmp);
+    std::string reverseComparison(std::string cmp);
 };
 
 #endif
