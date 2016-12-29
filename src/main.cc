@@ -37,6 +37,7 @@ Strategy::Type StrategyFlag;
 static cl::opt<Strategy::Type, true> StrategyType(cl::desc("Reordering strategy"),
     cl::values(
       clEnumValN(Strategy::Reverse, "reverse", "Reverse the order of loop iteration"),
+      clEnumValN(Strategy::Identity, "identity", "Leave loops unchanged"),
       nullptr
     ), 
     cl::location(StrategyFlag), cl::init(Strategy::Identity), cl::cat(OptionsCategory));
