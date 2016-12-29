@@ -7,6 +7,7 @@
 #include "AnnotateSkeletonsAction.hh"
 #include "DetectSkeletonsAction.hh"
 #include "DetectDynamicAction.hh"
+#include "Flags.hh"
 #include "Log.hh"
 #include "LoopReorderer.hh"
 
@@ -32,11 +33,13 @@ static cl::opt<ProgramMode> Mode(cl::desc("Application mode"),
       nullptr
     ), cl::cat(OptionsCategory), cl::Required);
 
-static cl::opt<Strategy::Type> StrategyType(cl::desc("Reordering strategy"),
+Strategy::Type StrategyFlag;
+static cl::opt<Strategy::Type, true> StrategyType(cl::desc("Reordering strategy"),
     cl::values(
       clEnumValN(Strategy::Reverse, "reverse", "Reverse the order of loop iteration"),
       nullptr
-    ), cl::init(Strategy::Identity), cl::cat(OptionsCategory));
+    ), 
+    cl::location(StrategyFlag), cl::init(Strategy::Identity), cl::cat(OptionsCategory));
 
 int main(int argc, const char **argv) {
   CommonOptionsParser op(argc, argv, OptionsCategory);

@@ -1,5 +1,6 @@
 #include "Common.hh"
 #include "DynamicHandler.hh"
+#include "Flags.hh"
 #include "Log.hh"
 #include "LoopReorderer.hh"
 
@@ -31,7 +32,7 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
     log(Debug, "Found reorderable loop");
 
     Rewriter r(*Result.SourceManager, LangOptions());
-    LoopReorderer lro(Strategy::Identity, *Result.Context);
+    LoopReorderer lro(StrategyFlag, *Result.Context);
     string newSource = lro.transform(forS);
 
     r.ReplaceText(forS->getSourceRange(), newSource);
