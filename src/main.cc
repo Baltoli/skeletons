@@ -32,11 +32,11 @@ static cl::opt<ProgramMode> Mode(cl::desc("Application mode"),
       nullptr
     ), cl::cat(OptionsCategory), cl::Required);
 
-static cl::opt<Strategy::Type> StrategyMode(cl::desc("Reordering strategy"),
+static cl::opt<Strategy::Type> StrategyType(cl::desc("Reordering strategy"),
     cl::values(
       clEnumValN(Strategy::Reverse, "reverse", "Reverse the order of loop iteration"),
       nullptr
-    ), cl::cat(OptionsCategory), cl::Required);
+    ), cl::init(Strategy::Identity), cl::cat(OptionsCategory));
 
 int main(int argc, const char **argv) {
   CommonOptionsParser op(argc, argv, OptionsCategory);
