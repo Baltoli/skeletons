@@ -34,6 +34,9 @@ class LoopReorderer {
     std::string code(const clang::Stmt *stmt);
     std::string identity(Loop loop);
     std::string reverse(Loop loop);
+    std::string comparisonOp(const clang::Expr *e);
+    int reverseBound(std::string cmp);
+    std::string reverseComparison(std::string cmp);
 };
 
 #endif

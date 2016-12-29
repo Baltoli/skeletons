@@ -1,3 +1,4 @@
+#include "Log.hh"
 #include "LoopReorderer.hh"
 
 #include <sstream>
@@ -44,8 +45,28 @@ string LoopReorderer::reverse(Loop loop) {
   st << "for ("
      << loop.var << " = "
      << code(loop.bound) << " - 1;"
-     << loop.var << " >= " << code(loop.init) << "; "
+     << loop.var << reverseComparison(comparisonOp(loop.stmt->getCond())) 
+     << code(loop.init) << "; "
      << loop.var << "--)"
      << code(loop.stmt->getBody());
   return st.str();
+}
+
+string LoopReorderer::comparisonOp(const Expr *e) {
+  auto binop = dyn_cast<BinaryOperator>(e);
+  return BinaryOperator::getOpcodeStr(binop->getOpcode());
+}
+
+int LoopReorderer::reverseBound(string cmp) {
+  if(cmp == "<") return 1;
+  if(cmp == "<=") return 0;
+
+  log(Debug, "Unknown comparison operator when reversing loop: " + cmp);
+
+  return 0;
+}
+
+string LoopReorderer::reverseComparison(string cmp) {
+  // TODO: implement other direction
+  return ">=";
 }
