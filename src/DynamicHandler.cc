@@ -2,6 +2,7 @@
 #include "DynamicHandler.hh"
 #include "Flags.hh"
 #include "Log.hh"
+#include "Loop.hh"
 #include "LoopReorderer.hh"
 
 #include <clang/Rewrite/Core/Rewriter.h>
@@ -33,7 +34,8 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
 
     Rewriter r(*Result.SourceManager, LangOptions());
     LoopReorderer lro(StrategyFlag, *Result.Context);
-    string newSource = lro.transform(forS);
+    Loop loop(forS, bindings[0], "BOUND");
+    string newSource = lro.transform(loop);
 
     r.ReplaceText(forS->getSourceRange(), newSource);
     r.overwriteChangedFiles();

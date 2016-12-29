@@ -14,17 +14,19 @@ string LoopReorderer::code(const Stmt *stmt) {
   return out;
 }
 
-string LoopReorderer::transform(const ForStmt *stmt) {
+string LoopReorderer::transform(Loop loop) {
   switch(strategy) {
     case Strategy::Reverse:
-      return reverse(stmt);
+      return reverse(loop);
     default:
-      return identity(stmt);
+      return identity(loop);
   }
 }
 
-string LoopReorderer::identity(const ForStmt *stmt) {
+string LoopReorderer::identity(Loop loop) {
+  auto stmt = loop.stmt;
   stringstream st;
+
   st << "for ("
      << code(stmt->getInit())
      << code(stmt->getCond()) << "; "
@@ -33,6 +35,6 @@ string LoopReorderer::identity(const ForStmt *stmt) {
   return st.str();
 }
 
-string LoopReorderer::reverse(const ForStmt *stmt) {
+string LoopReorderer::reverse(Loop loop) {
   return "";
 }
