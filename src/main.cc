@@ -4,10 +4,11 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <llvm/Support/CommandLine.h>
 
+#include "AnnotateSkeletonsAction.hh"
 #include "DetectSkeletonsAction.hh"
 #include "DetectDynamicAction.hh"
-#include "AnnotateSkeletonsAction.hh"
 #include "Log.hh"
+#include "LoopReorderer.hh"
 
 using namespace llvm;
 using namespace clang;
@@ -24,10 +25,16 @@ static cl::opt<bool> Overwrite("overwrite", cl::desc("Overwrite source files"),
                                cl::cat(OptionsCategory));
 static cl::alias OverwriteA("w", cl::desc("Alias for -overwrite"), cl::aliasopt(Overwrite));
 
-static cl::opt<ProgramMode> Mode(cl::desc("choose application mode"),
+static cl::opt<ProgramMode> Mode(cl::desc("Application mode"),
     cl::values(
-      clEnumVal(Static, "Statically analyse the program"),
-      clEnumVal(FindReorderable, "Dynamically find reorderable loops"),
+      clEnumValN(Static, "static", "Statically analyse the program"),
+      clEnumValN(FindReorderable, "reorder", "Dynamically find reorderable loops"),
+      nullptr
+    ), cl::cat(OptionsCategory), cl::Required);
+
+static cl::opt<Strategy::Type> StrategyMode(cl::desc("Reordering strategy"),
+    cl::values(
+      clEnumValN(Strategy::Reverse, "reverse", "Reverse the order of loop iteration"),
       nullptr
     ), cl::cat(OptionsCategory), cl::Required);
 
