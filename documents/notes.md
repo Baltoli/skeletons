@@ -245,3 +245,46 @@ this in instead of the actual loop.
 
 In the very long term this is almost certainly a worse approach, but it ought to
 work in this case.
+
+Note that the formatting erros caused by me assembling code like this can (and
+should) be fixed by using clang-format.
+
+Why does the tool segfault if the intermediate result is assigned to a variable
+before passing it into Tool.run()? Only thing I can think of is something screwy
+with ownership semantics etc.
+
+### Strategies
+
+**Loop reversal:** We want a loop to iterate backwards instead of forwards. For
+example:
+
+    for(int i = 0; i < N; i++) {
+      work(i);
+    }
+
+will become:
+
+    for(int i = N - 1; i >= 0; i--) {
+      work(i);
+    }
+
+Some things that I will need to work out from the for loop are:
+* Whether this loop can actually be reversed or not:
+  * Needs an upper bound on the loop variable. The condition needs to be a
+    binary operator, and the upper / lower bound will be the LHS of this
+    operator. The AST matcher should take care of this for us, so we should just
+    have to extract the relevant components.
+  * The AST matcher restricts us to loops that have a declaration or a direct
+    assignment to a variable as their initialisation statement. Use `isa` tests
+    to get the loop variables out of these as appropriate.
+  * The loop increment matcher currently only matches `++`, but could easily be
+    extended to work on `--` in the future (along with a way of reversing loop
+    condition checks).
+
+Once we have the loop variable, bound and condition, the next step is to
+reconstruct the reversed loop out of the components.
+
+Now have a PODO that contains loop metadata along with a pointer to the clang
+ForStmt containing all the other loop data. In DynamicHandler I can use the
+ASTMatcher to bind a name to the AST node containing the loop condition, then
+pass that as well.
