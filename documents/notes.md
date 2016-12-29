@@ -288,3 +288,80 @@ Now have a PODO that contains loop metadata along with a pointer to the clang
 ForStmt containing all the other loop data. In DynamicHandler I can use the
 ASTMatcher to bind a name to the AST node containing the loop condition, then
 pass that as well.
+
+Should change the interface to this PODO a bit. The reorderer already knows how
+to turn a statement into a string, so we should in fact just pass the statements
+bound by the matcher into the constructor rather than the strings we find. Also
+need to pass the initialiser. The loop variable should just be passed as a
+string though, as it's the only thing that doesn't fit neatly into a Stmt (as
+the bound, initialiser etc. do).
+
+Should add the ability to reverse loops other than increasing loops to the loop
+reverser - currently can only reverse < / <= and ++. Would be useful to do > /
+>= / --.
+
+## Next Steps
+
+So we currently have a system for reordering loops (in a semi-generic way),
+along with a script that allows for a file to be copied and reordered using
+strategies. The next steps will be to:
+* Implement some more reordering strategies (to get better coverage of the
+  possible subtleties that might be hidden by the code)
+* Build some example programs (using GSL?) so that evaluation can be started.
+* This system currently operates at a file level. Obviously not every loop in a
+  file can be reordered - some might be possible while others might not be. This
+  is obviously an iterative process, and so we need some mechanism for making it
+  workable for a programmer.
+* The minimum possible solution for making this an acceptable tool for a
+  programmer to use is some way to report iterative feedback to the programmer.
+  For example, this might involve them marking a particular loop as
+  parallelisable or not (how to best do this marking in the source file?)
+* One possible way to do the marking is to define a couple of macros (PARALLEL /
+  NO_PARALLEL) that expand to annotation attributes (but a loop can't be
+  directly annotated).
+* My best here so far is to define a macro `NOPAR` that adds a redundant `,0`
+  onto the end of the for loop's specifier, breaking the AST matcher when run on
+  it (turns the final part into a binary rather than a unary operator).
+* The programmer will have to perform a manual debugging process through marking
+  functions as par / nopar.
+* This isn't really ideal, as the compiler should really be doing more work
+  here. How about:
+  * Tool exits as soon as it finds *one* reorderable loop (reporting file, line
+    numbers etc.). Should also output an identifier of some sort? 
+  * The build script can then be used to automatically compile the project with
+    each strategy applied.
+  * Each compiled version can then be automatically run using the run script,
+    and the outputs compared. If all are the same, then use a script to insert a
+    macro at the source location reported previously (MAYBE_PAR). If they are
+    not, insert NO_PAR:
+    
+        for(int i = 0; i < N; i++) {
+          work(i);
+        }
+
+        MAYBE_PAR_FOR(int i = 0; i < N; i++) {
+          work(i);
+        }
+
+        NO_PAR_FOR(int i = 0; i < N; i++) {
+          work(i);
+        }
+
+        PAR_FOR(int i = 0; i < N; i++) {
+          work(i);
+        }
+
+    where:
+        
+        #define MAYBE_PAR_FOR(x) for (x,0)
+        #define NO_PAR_FOR(x) for (x,0)
+        #define PAR_FOR(x) _Pragma("omp parallel for") for (x,0)
+  * This strategy means that anything annotated with these macros will be
+    ignored in the future by the AST matcher (downside is code *may* break if
+    it's weird enough - this is OK). Then when it's run the next time, another
+    loop will be discovered iteratively (run until no more are discovered!).
+  * Next thing to work on is probably build script integration - need a way to
+    programmatically compile variants of a file into multiple executables. CMake
+    will be awful for this, so probably just a little shell script is the best
+    way. Write up in evaluation about how the non-traditional build model means
+    that integration with existing tools is borderline terrible.
