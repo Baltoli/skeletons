@@ -9,6 +9,7 @@
 struct Strategy {
   public:
     enum Type {
+      Identity,
       Reverse
     };
 
@@ -29,6 +30,7 @@ class LoopReorderer {
     Strategy strategy;
     clang::ASTContext &context;
     std::string code(const clang::Stmt *stmt);
+    std::string identity(const clang::ForStmt *stmt);
     std::string reverse(const clang::ForStmt *stmt);
 };
 
