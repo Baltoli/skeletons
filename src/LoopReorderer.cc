@@ -10,7 +10,11 @@ using namespace llvm;
 string LoopReorderer::code(const Stmt *stmt) {
   string out;
   raw_string_ostream stream(out);
-  stmt->printPretty(stream, nullptr, PrintingPolicy(context.getLangOpts()));
+
+  if(stmt) {
+    stmt->printPretty(stream, nullptr, PrintingPolicy(context.getLangOpts()));
+  }
+
   return out;
 }
 
@@ -38,10 +42,10 @@ string LoopReorderer::identity(Loop loop) {
 string LoopReorderer::reverse(Loop loop) {
   stringstream st;
   st << "for ("
-     << loop.loopVariable << " = "
-     << loop.bound << " - 1;"
-     << loop.loopVariable << " >= 0;"
-     << loop.loopVariable << "--)"
+     << loop.var << " = "
+     << code(loop.bound) << " - 1;"
+     << loop.var << " >= " << code(loop.init) << "; "
+     << loop.var << "--)"
      << code(loop.stmt->getBody());
   return st.str();
 }

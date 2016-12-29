@@ -16,23 +16,33 @@ struct Loop {
   const clang::ForStmt *stmt;
 
   /**
-   * The loop induction variable (for example, i in:
+   * The loop induction variable. For example, i in:
    *
    *     for (int i = 0; i < N; i++) {}
    */
-  std::string loopVariable;
+  std::string var;
 
   /**
-   * The loop upper bound (for example, N in:
+   * The initializer for the loop induction variable. For example, 0 in:
+   * 
+   *     for (int i = 0; i < N; i++) {}
+   */
+  const clang::Stmt *init;
+
+  /**
+   * The loop upper bound. For example, N in:
    *
    *     for (int i = 0; i < N; i++) {}
    *
    * This could be a variable, constant or some other type
    */
-  std::string bound;
+  const clang::Stmt *bound;
 
-  Loop(const clang::ForStmt *fs, std::string lv, std::string bo) :
-    stmt(fs), loopVariable(lv), bound(bo) {}
+  Loop(const clang::ForStmt *fs, 
+       std::string v, 
+       const clang::Stmt *i, 
+       const clang::Stmt *b) :
+    stmt(fs), var(v), init(i), bound(b) {}
 };
 
 #endif

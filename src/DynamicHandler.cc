@@ -30,11 +30,17 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
+    const Stmt *init = Result.Nodes.getNodeAs<Stmt>("init");
+    if(!init) {
+      log(Debug, "No initialiser for reorderable loop");
+      return;
+    }
+
     log(Debug, "Found reorderable loop");
 
     Rewriter r(*Result.SourceManager, LangOptions());
     LoopReorderer lro(StrategyFlag, *Result.Context);
-    Loop loop(forS, bindings[0], "BOUND");
+    Loop loop(forS, bindings[0], init, nullptr);
     string newSource = lro.transform(loop);
 
     r.ReplaceText(forS->getSourceRange(), newSource);
@@ -59,7 +65,7 @@ StatementMatcher DynamicHandler::initMatcher() {
     anyOf(
       declStmt(hasSingleDecl(
         varDecl(
-          hasInitializer(ignoringParenImpCasts(integerLiteral()))
+          hasInitializer(ignoringParenImpCasts(integerLiteral().bind("init")))
         ).bind("initVar")
       )),
       binaryOperator(
@@ -67,7 +73,7 @@ StatementMatcher DynamicHandler::initMatcher() {
         hasLHS(ignoringParenImpCasts(
           declRefExpr(to(varDecl(hasType(isInteger())).bind("initVar")))
         )),
-        hasRHS(ignoringParenImpCasts(integerLiteral()))
+        hasRHS(ignoringParenImpCasts(integerLiteral().bind("init")))
       )
     )
   );
