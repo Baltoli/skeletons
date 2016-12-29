@@ -73,10 +73,15 @@ include_directories(
 add_llvm_executable(skel
   src/main.cc
   src/DetectSkeletonsAction.cc
+  src/DetectDynamicAction.cc
   src/AnnotateSkeletonsAction.cc
   src/DetectSkeletonsASTConsumer.cc
+  src/DetectDynamicASTConsumer.cc
   src/MapMatcher.cc
+  src/DynamicHandler.cc
   src/Log.cc
+  src/Common.cc
+  src/LoopReorderer.cc
 )
 foreach(i
 	Analysis AST ASTMatchers Basic Driver Edit Frontend Lex Parse

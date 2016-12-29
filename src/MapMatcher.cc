@@ -8,34 +8,13 @@
 #include <clang/Rewrite/Core/Rewriter.h>
 #include <clang/Basic/LangOptions.h>
 
+#include "Common.hh"
 #include "Log.hh"
 
 using std::vector;
 using std::string;
 using namespace clang;
 using namespace clang::ast_matchers;
-
-namespace {
-
-static string getDeclName(const MatchFinder::MatchResult &Result, string binding) {
-  auto decl = Result.Nodes.getNodeAs<VarDecl>(binding);
-  if(decl) {
-    return decl->getNameAsString();
-  } else {
-    return string("");
-  }
-}
-
-static bool allEqual(vector<string> ss) {
-  if(ss.size() < 1) {
-    return true;
-  }
-
-  auto first = *ss.begin();
-  return std::all_of(ss.begin() + 1, ss.end(), [&](string s) { return s == first; });
-}
-
-}
 
 MapHandler::MapHandler(bool o) : overwrite(o) {}
 
