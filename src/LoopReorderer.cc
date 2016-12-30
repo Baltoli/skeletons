@@ -45,7 +45,8 @@ string LoopReorderer::reverse(Loop loop) {
   st << "for ("
      << (loop.declared ? "int " : "")
      << loop.var << " = "
-     << code(loop.bound) << " - 1;"
+     << code(loop.bound) << " - " 
+     << reverseBound(comparisonOp(loop.stmt->getCond())) << "; "
      << loop.var << reverseComparison(comparisonOp(loop.stmt->getCond())) 
      << code(loop.init) << "; "
      << loop.var << "--)"

@@ -92,7 +92,10 @@ StatementMatcher DynamicHandler::initMatcher() {
 StatementMatcher DynamicHandler::conditionMatcher() {
   return (
     binaryOperator(
-      hasOperatorName("<"),
+      anyOf(
+        hasOperatorName("<"),
+        hasOperatorName("<=")
+      ),
       hasLHS(ignoringParenImpCasts(
         declRefExpr(to(varDecl(hasType(isInteger())).bind("condVar")))
       )),
