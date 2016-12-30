@@ -3,7 +3,7 @@
 strategies=(identity reverse)
 
 usage() {
-  echo "Usage: $0 [strategies] <output dir> <file>"
+  echo "Usage: $0 [strategies] output_dir file"
   echo "available strategies:"
 
   for strat in ${strategies[@]}
@@ -45,7 +45,7 @@ then
   exit 3
 fi
 
-for strat in ${strategies[@]}
+for strat in ${strats[@]}
 do
   s=$strat
   s+="_"
