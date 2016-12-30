@@ -51,6 +51,8 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
 
     r.ReplaceText(forS->getSourceRange(), newSource);
     r.overwriteChangedFiles();
+
+    exit(0);
   }
 }
 
