@@ -54,6 +54,10 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
     r.ReplaceText(forS->getSourceRange(), newSource);
     r.overwriteChangedFiles();
 
+    llvm::outs() 
+      << Result.Context->getFullLoc(forS->getLocStart()).getSpellingLineNumber() 
+      << '\n';
+
     exit(0);
   }
 }
