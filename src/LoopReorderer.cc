@@ -33,7 +33,7 @@ string LoopReorderer::identity(Loop loop) {
   stringstream st;
 
   st << "for ("
-     << code(stmt->getInit()) << "; "
+     << code(stmt->getInit()) << (loop.declared ? "" : ";")
      << code(stmt->getCond()) << "; "
      << code(stmt->getInc()) << ") "
      << code(stmt->getBody());
@@ -43,8 +43,10 @@ string LoopReorderer::identity(Loop loop) {
 string LoopReorderer::reverse(Loop loop) {
   stringstream st;
   st << "for ("
+     << (loop.declared ? "int " : "")
      << loop.var << " = "
-     << code(loop.bound) << " - 1;"
+     << code(loop.bound) << " - " 
+     << reverseBound(comparisonOp(loop.stmt->getCond())) << "; "
      << loop.var << reverseComparison(comparisonOp(loop.stmt->getCond())) 
      << code(loop.init) << "; "
      << loop.var << "--)"
