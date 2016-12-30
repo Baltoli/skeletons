@@ -42,11 +42,13 @@ void DynamicHandler::run(const MatchFinder::MatchResult &Result) {
       return;
     }
 
+    const DeclStmt *declared = Result.Nodes.getNodeAs<DeclStmt>("declared");
+
     log(Debug, "Found reorderable loop");
 
     Rewriter r(*Result.SourceManager, LangOptions());
     LoopReorderer lro(StrategyFlag, *Result.Context);
-    Loop loop(forS, bindings[0], init, bound);
+    Loop loop(forS, bindings[0], declared != nullptr, init, bound);
     string newSource = lro.transform(loop);
 
     r.ReplaceText(forS->getSourceRange(), newSource);
@@ -75,7 +77,7 @@ StatementMatcher DynamicHandler::initMatcher() {
         varDecl(
           hasInitializer(ignoringParenImpCasts(integerLiteral().bind("init")))
         ).bind("initVar")
-      )),
+      )).bind("declared"),
       binaryOperator(
         hasOperatorName("="),
         hasLHS(ignoringParenImpCasts(
