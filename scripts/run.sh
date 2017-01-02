@@ -25,9 +25,9 @@ do
   out=$(./"$strat"_$exe $ARGS)
   if [ "$out" != "$good" ]
   then
-    ./annotate.sh n $manifest
+    annotate.sh n $manifest
     exit 0
   fi
 done
 
-./annotate.sh m $manifest
+annotate.sh m $manifest
