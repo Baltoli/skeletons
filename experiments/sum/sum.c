@@ -7,3 +7,9 @@ long sum(long *arr, long n) {
   }
   return sum;
 }
+
+void csum(long *in, long *out, long n) {
+  for(long i = 0; i < n; i++) {
+    out[i] = sum(in, i);
+  }
+}

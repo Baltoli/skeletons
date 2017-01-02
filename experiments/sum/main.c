@@ -4,10 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define SIZE 100000
+
 int main(void) {
-  long *arr = malloc(sizeof(*arr) * 1000000);
-  fill(arr, 1000000);
-  long s = sum(arr, 1000000);
-  printf("%ld\n", s);
+  long *arr = malloc(sizeof(*arr) * SIZE);
+  long *out = malloc(sizeof(*out) * SIZE);
+  fill(arr, SIZE);
+  csum(arr, out, SIZE);
+  printf("%ld\n", out[45]);
   return 0;
 }
