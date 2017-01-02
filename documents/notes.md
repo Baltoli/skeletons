@@ -465,3 +465,7 @@ that describe the tool well:
     needs a separate example, because the sum of the arrays needs to be
     deterministic). Maybe better to remove the random fill from the sum
     experiment, and implement a deterministic fill? 
+
+Should be obvious but it's worth noting that programs run using this dynamic
+instrumenter need to be pure / deterministic in terms of what they output
+(fill.c serves as a good example of this).
