@@ -11,6 +11,12 @@ then
 fi
 
 line=$(head -n1 $2 | tail -1)
+if [ -z $line ]
+then
+  echo "Empty line in manifest - no loops found"
+  exit 2
+fi
+
 file=$(head -n2 $2 | tail -1)
 
 case $1 in
