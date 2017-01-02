@@ -51,5 +51,7 @@ do
   s+="_"
   base=$(basename $filename)
   cp $filename "$output_dir/$s$base"
-  skel -reorder -$strat "$output_dir/$s$base" --
+  line=$(skel -reorder -$strat "$output_dir/$s$base" --)
+  echo $line
+  echo "$base"
 done

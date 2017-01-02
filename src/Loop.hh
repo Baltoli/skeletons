@@ -23,6 +23,12 @@ struct Loop {
   std::string var;
 
   /**
+   * Whether the loop has declared its induction variable inline (as is
+   * permitted in C99 onwards).
+   */
+  bool declared;
+
+  /**
    * The initializer for the loop induction variable. For example, 0 in:
    * 
    *     for (int i = 0; i < N; i++) {}
@@ -40,9 +46,10 @@ struct Loop {
 
   Loop(const clang::ForStmt *fs, 
        std::string v, 
+       bool d,
        const clang::Stmt *i, 
        const clang::Stmt *b) :
-    stmt(fs), var(v), init(i), bound(b) {}
+    stmt(fs), var(v), declared(d), init(i), bound(b) {}
 };
 
 #endif
