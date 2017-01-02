@@ -365,3 +365,103 @@ strategies. The next steps will be to:
     will be awful for this, so probably just a little shell script is the best
     way. Write up in evaluation about how the non-traditional build model means
     that integration with existing tools is borderline terrible.
+  * This approach of using a manual script is stupid. Let's try to use a
+    Makefile instead (this is what they're for, after all!)
+
+Current status: I now have a build script that will automatically generate
+reordered code and compile another version of the application. Next step will be
+to make the tool exit after the *first* reordered loop, so that we can have a
+more interactive process.
+
+The type of every reordered loop is int for now. This might break weird code but
+that can be fixed in the future.
+
+The tool can now report the line at which it has reordered a loop. Next step is
+to modify the reordering script so that it reports the line number and the file
+in which the loop was found. This should go out to a file so that o
+
+The annotation script can now read in a file as output by the reordering script.
+The final step in this convoluted build process is the runner script. It will
+need to take the manifest file, the base executable name and the list of
+strategies. It can then run each executable and compare the results. As soon as
+one is unequal, call annotate.sh to put in a `NO_PAR_FOR`. Otherwise, call
+annotate to put in a `MAYBE_PAR_FOR`.
+
+Usage note - currently no validation is done to ensure that every manifest file
+produced is the same (running the makefile will produce a new one for each
+incantation, but in theory they match so it's OK).
+
+Back from a few days off. Next step should probably be to write some example
+programs that can be compiled using this terrible workflow (demonstrating that
+the parallelism in contrived examples can in fact be discovered).
+
+Need to think about what kind of example will be amenable to doing this kind of
+parallelism. Could implement some kind of numerical algorithm that will operate
+on large arrays of data doing transformations. Might be best to try it on a
+simple example for now to validate the workflow. Simplest possible example:
+summing over a large array.
+
+Ergonomics of the workflow probably aren't great at the moment - it requires
+copying of scripts etc. Where do scripts need to be edited currently after
+copying?
+  * List of sources and experiment to build in the Makefile
+  * Macros need to be changed depending on the parallelisation strategy (e.g. to
+    add an OpenMP pragma)
+
+Note for writeup in the future: nested loops pose a problem for the workflow as
+it is at the moment. For example, consider:
+
+    for(int i = 0; i < N; i++) {
+      for(int j = 0; j < M; j++) {
+        work(i,j);
+      }
+    }
+
+This is OK as long as loops are evaluated *and parallelised* fully before
+another loop is considered. If both the inner and the outer loop are marked as
+'maybe', but only one of the two could possibly be parallelised, then it is
+plausible that the user could end up in a situation where the tool has reported
+that parallelism is safe when it is not. Write this up - important "gotcha" with
+the tool as it currently stands.
+
+Sequential loop reorderings (fundamentally) cannot detect problems caused by the
+interleaving of loop iterations. Consider, for example, the problem of
+iterations updating a shared variable (as the sum example does). There is
+obviously no problem with sequential reorderings doing this out of order, as
+they can't interfere with it. However, parallel reorderings can potentially
+interfere with each other. How should this issue be addressed?
+  * Hand the issue off to the programmer as part of their examination of the
+    parallelism in the program. If there is shared state accessed, then they are
+    responsible for noticing and explicitly annotating the loop as being
+    parallel. All the tool has done is observe that some sequential reorderings
+    of the loop preserve the externally observable behaviour of the program.
+  * Use a more complex reordering strategy that affects writes inside the loop
+    somehow? This goes a little bit beyond what the tool is supposed to do.
+  * Give more useful diagnostics and documentation to the user - e.g. mentioning
+    the need to protect shared state by an atomic variable.
+Note that there are actually algorithms that are better behaved with regard to
+parallel performance than the simple sum algorithm implemented so far. As long
+as the read / write sets accessed by each iteration are independent (as well as
+the behaviour remains the same), then they can be safely parallelised. It will
+probably be worth mentioning the read / write set analysis in the writeup as a
+potential extension that adds a great deal of usefulness to what is currently a
+rather simple analysis. To do so would require some degree of fiddling with the
+memory allocator etc. - how would you guarantee anything about stack addresses
+for two separately compiled applications?
+
+The simple sum experiment should actually provide a pretty good set of examples
+that describe the tool well:
+  * A cumulative sum in which the sum algorithm itself is not parallel, but many
+    calls are made to copy the cumulative sum (modulo some bound) into another
+    array. It can be pointed out that the programmer is aware that each
+    iteration is independent of the others in terms of memory written to (each
+    will only write to a single location in the output array, and the input
+    array is read-only). Also gives a good jumping-off point for talking about
+    more clever analyses (e.g. syscalls and memory read / written).
+  * The normal sum is a good example of something marked as 'maybe' but is
+    actually not strictly parallelisable in its current form (without marking as
+    atomic).
+  * The random fill should be one that's not parallelisable at all (although
+    needs a separate example, because the sum of the arrays needs to be
+    deterministic). Maybe better to remove the random fill from the sum
+    experiment, and implement a deterministic fill? 
