@@ -2,6 +2,8 @@
 
 \usepackage{blindtext}
 \usepackage{graphicx}
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{/Users/brucecollie/Documents/Uni/Academic/zotero.bib}
 
 \ifCLASSINFOpdf
   % \usepackage[pdftex]{graphicx}
@@ -26,8 +28,8 @@
 
 \begin{document}
 
-\title{Detection and Optimisation of Parallel Skeletons}
-\author{Bruce Collie (Trinity Hall)}
+\title{Dynamic Discovery of Parallelisable Code}
+\author{Bruce Collie, Trinity Hall}
 
 \markboth{Modern Compiler Design, Part III Computer Science 2016-17}{}
 
@@ -35,22 +37,86 @@
 
 \begin{abstract}
 
-We want to detect parallel skeletons in C code.
+  The automatic discovery of parallelism in programs has been a goal of compiler
+  engineers for many years. However, many traditional static analysis techniques
+  fail to do so effectively. In this report I describe a dynamic approach to
+  discovering potentially parallelisable code in C programs using an iterative
+  approach to compilation. I provide a framework for integrating iterative
+  compilation into a project, and show how this approach can be used to refine
+  the structure of a C program based on dynamic analysis of the program's
+  execution. Further to this, I discuss the limitations of my approach and how
+  future work could provide stronger analyses and a more complex evaluation
+  framework for executions. Finally, I give demonstrations of the tool being
+  used on both simple example programs written for this purpose and a larger
+  corpus of open source code, along with an evaluation of the successes and
+  failures of this type of analysis.
 
 \end{abstract}
 
 \begin{IEEEkeywords}
-parallel skeletons, auto-parallelisation, optimisation
+auto-parallelisation, optimisation, dynamic analysis
 \end{IEEEkeywords}
 
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
 
+An increasingly prevalent trend in computer hardware is that of parallelism.
+More than ever, improvements in single-threaded performance are slow in
+comparison to increased parallelism (in many different forms, such as GPGPU
+computation or hyper-threaded CPU cores). However, writing concurrent code that
+is both performant and correct remains an open problem in software engineering.
+The inherent difficulty in this task arises for a number of different
+reasons---cognitive overhead caused by increased complexity in the programming
+model, difficulty in debugging nondeterministic executions, and unintuitive
+performance characteristics. It is for these reasons that the goal of having
+parallelism in programs be automatically detected and exploited is attractive.
+Being able to abstract away as many of the problems of writing parallel code as
+possible means that programmers will be able to work more effectively using
+modern hardware and software features.
+
+The automatic discovery of parallel structure in code is made far more difficult
+by the unstructured way in which programs are usually written.  The intent of a
+piece of code may not be easily determined from its textual representation,
+especially in a language with little abstraction from the hardware such as C.
+Some previous work aims to deliberately write programs such that they are
+parallel by construction (for example, the language of ``Parallel Skeletons''
+described by \textcite{gorlatch_parallel_2011} composes larger programs out of
+parallel primitives). In some cases, these structured approaches are optimisable
+for significant performance gains (an example of this is the machine-learning
+approach taken by \textcite{collins_masif:_2013} to optimising parallel
+skeletons).
+
+However, these approaches are not broadly applicable to existing code.
+\textcite{maleki_evaluation_2011} give an evaluation of auto-vectorising
+implementations in mainstream C compilers, finding that almost all of the
+available opportunities are not capitalised upon by the static analysis
+techniques used.
+
+In this report I describe an alternative method for discovering potentially
+parallelisable code in C programs. \textcite{fursin_evaluating_2002} introduce
+the idea of \emph{iterative compilation}, where a program is compiled in
+multiple steps with feedback applied at each step to improve the program. I
+present a basic implementation of the iterative compilation idiom that uses the
+runtime behaviour of programs to provide feedback to successive compilations.
+This implementation is then used (together with user feedback) to discover and
+annotate possible source-level parallelism in a program. I evaluate the success
+of this approach compared to a static analysis with similar goals.
+
+\section{Iterative Compilation Framework}
+
+\section{Static Analysis}
+
+\section{Dynamic Analysis}
+
+\section{Evaluation}
+
 \section{Conclusion}
 
 \ifCLASSOPTIONcaptionsoff
   \newpage
 \fi
+
+\printbibliography
 
 \end{document}
