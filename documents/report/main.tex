@@ -13,6 +13,10 @@
   rectangle, draw, rounded corners, text centered, text width =
   7em, minimum height = 2em
 ]
+\tikzstyle{rblock} = [
+  rectangle, draw, text centered, text width =
+  7em, minimum height = 2em
+]
 \tikzstyle{dottedblock} = [
   rectangle, draw, rounded corners, text centered, text width =
   7em, minimum height = 2em,dashed
@@ -131,7 +135,7 @@ In this section I specify the dynamic analysis that will be performed on
 programs, as well as the implementation of this analysis. I also compare the
 analysis to a static version that aims to discover similar patterns in code.
 
-\subsection{Specification}
+\subsection{Specification} \label{ssec:spec}
 
 \textcite{darlington_parallel_1995} describe a number of the primitive
 ``parallel skeletons'' that can be composed to implement a larger program.
@@ -203,18 +207,169 @@ more depth in \autoref{sec:eval}.
 
 \subsection{Implementation} \label{ssec:impl}
 
+The primary goal of the dynamic analysis implemented in this project is to
+identify loops that could potentially be parallelised, and subsequently to
+reorder the iterations of these loops in an attempt to trigger changes in the
+program's behaviour. If there are no such changes, then there is some evidence
+that the loop could be parallelised (though as discussed previously, this
+evidence is not conclusive).
+
+\subsubsection{Clang Tooling}
+
+Clang provides a rich set of libraries for analysing and modifying source code,
+at both the textual and AST levels. In particular, the AST matchers framework
+allows for predicates on the AST to be written that match nodes with a certain
+structure. Components of these nodes can have names bound to them and analysed
+as required. The implementation of the loop reordering component of the dynamic
+analysis uses this framework to detect loop structures in the code that can
+potentially be reordered, as well as the source rewriting support in Clang to
+perform the modification of source files. 
+
+\begin{figure}[h]
+  \centering
+  \begin{lstlisting}
+unaryOperator(
+  hasOperatorName("++"),
+  hasUnaryOperand(ignoringParenImpCasts(
+    declRefExpr(
+      to(varDecl(hasType(isInteger())
+    )
+  )
+)
+  \end{lstlisting}
+  \caption{AST matcher that matches an increment of an integer variable}
+  \label{lst:astm}
+\end{figure}
+
+Idiomatically, Clang tools that analyse source code can either make changes in
+place to the file or output a modified file to standard output. Because of this,
+the loop reordering component simply replaces loops in a source file with a
+reordered version. In \autoref{sec:iter}, a description of the tooling developed
+to better integrate this into a traditional development workflow is given.
+
+\subsubsection{Reordering Strategies}
+
+There are many different ways in which a particular \texttt{for} loop could be
+reordered. For example, iteration could be reversed, or all even iterations
+could be executed first. Not every loop can be reordered in every possible
+way---to work around this problem, I implemented several different
+``strategies'' for reordering a loop:
+
+\textbf{Reverse:} the loop iterates in reverse order. This strategy can be
+applied to any conventionally structured \texttt{for} loop (that is, one that
+has an initializer, upper bound and loop increment).
+
+\textbf{Random:} if the loop initializer and upper bound are compile-time
+constants, then loop iterations can be randomly ordered by unrolling the loop at
+the source level (with an unrolled instance of the body for each loop
+iteration).
+
+\textbf{Odd-Even:} half of the iterations are executed first, then the other
+half. This requires that the loop increment is exactly 1 (so that the two
+reordered copies can each have an increment of 2).
+
+Each of these strategies is implemented as a method that takes a Clang
+\texttt{ForStmt} node together with some contextual information, then returns a
+string representing the reordered loop. This string is then used as a direct
+replacement for the detected loop.
+
+The tool accepts a command line parameter specifying the reordering strategy to
+be used on a source file. Each strategy specifies an AST matcher that detects
+loops with the appropriate structure (for example, the odd-even matcher
+specifies an increment of 1, and the random matcher specifies compile-time
+constant initial and bound values).
+
+\subsubsection{Experimentation}
+
+Because the reordered loops are intended to be run experimentally (so as to
+determine whether or not their reordering affects the behaviour of the program),
+the tool only reorders a single loop at a time when it is run on a source file.
+If more loops were reordered, it may become difficult to determine which
+reordering caused a behavioural change. By default, the first detected loop for
+a given strategy is reordered and all others are left unmodified.
+
+To allow the tool to be used as part of an experimental process, the tool prints
+the file name and source line on which the reordered loop was detected to
+standard output.
+
+\subsubsection{Summary}
+
+To summarise, the initial component of the dynamic analysis method implemented
+by this project is a command line utility that when passed the name of a source
+file and a reordering strategy, will attempt to detect a reorderable loop in the
+source file. If one is found, the reordering strategy is applied, modifying the
+file in place. The source location of the reordered loop is printed to standard
+output.
+
+\begin{figure}[h] 
+  \centering 
+  \begin{tikzpicture} 
+    \node[block] (source) {Source File}; 
+    \node[block, right=0.5cm of source] (strategy) {Reordering Strategy};
+    \path (source) -- node[rblock, below=1 cm] (cli) {Command Line Tool} (strategy);
+    \node[block, below=2.2cm of source] (re-source) {Reordered Source File};
+    \node[block, right=0.5cm of re-source] (loc) {Loop Location};
+
+    \draw[-latex] (source.south) -- ([xshift=5mm] cli.north west);
+    \draw[-latex] (strategy.south) -- ([xshift=-5mm] cli.north east);
+    \draw[-latex] ([xshift=5mm] cli.south west) -- (re-source.north);
+    \draw[-latex] ([xshift=-5mm] cli.south east) -- (loc.north);
+  \end{tikzpicture} 
+  \caption{Data flow in the loop reordering component}
+  \label{fig:tool}
+\end{figure}
+
+
 \subsection{Static Analysis}
 
 As well as the dynamic analysis described in \autoref{ssec:impl}, I investigated
 the implementation of a static method of performing a similar analysis. A
-comparison of the two methods is given in \autoref{ssec:compare}.
+comparison of the two methods is given in \autoref{ssec:compare}. As with the
+dynamic analysis described previously, the Clang AST matching framework was used
+to match structures within the program's AST.
 
-The Clang C compiler provides a rich set of libraries for analysing and
-modifying source code, at both the textual and AST levels. In particular, the
-AST matchers framework allows for predicates on the AST to be written that match
-nodes with a certain structure.
+In order to statically detect loops that are structured as a \texttt{map}, I
+wrote AST matchers that matched \texttt{for} loops with a particular structure.
+The basic structural criteria for loops that could possibly be parallelised
+were:
 
-\section{Iterative Compilation Framework}
+\begin{itemize}
+  \item Must initialize a variable to a constant value in the loop initializer
+    (with or without declaring it).
+  \item Must check whether that variable is less than a constant value in the
+    loop condition.
+  \item Must increment the loop variable (pre- or postfix).
+\end{itemize}
+
+These criteria are in fact overly strict, but they characterise those loops that
+iterate over a fixed range in increasing order. It is possible that a loop
+intended to act as a \texttt{map} operation iterates in a different way, but in
+the interests of keeping the AST matching code tractable, more complex matching
+strategies were not used.
+
+Once a loop with the correct iteration structure has been identified, its body
+must be analysed separately to determine whether or not it performs a mapping
+operation. Unfortunately, characterising an arbitrary AST fragment as having a
+specific intent is not an easy problem---the AST matching idiom only allows for
+exact (modulo ``implicit'' components such as casts or parentheses) matches to
+be detected. As a result, each possible behaviour that a loop could have must
+be encoded as an AST matcher. In addition, further analysis is likely to be
+needed (for example, to ensure that the loop iteration structure is not altered
+inside the loop body).
+
+For these reasons, and as it was not the primary focus of this project, only a
+limited set of loop body AST matchers and analyses were implemented:
+
+\begin{itemize}
+  \item Assignment to an element of an array, where the value being assigned is
+    an expression that includes a reference to the loop iteration variable.
+    Additionally, a check that the array is not assigned to by other code in the
+    body.
+  \item Check to ensure that neither the loop bound (if it is a variable) nor
+    the loop iteration variable are assigned to.
+\end{itemize}
+
+\section{Iterative Compilation Framework} \label{sec:iter}
 
 In this section I describe the framework I have implemented to integrate the
 dynamic analysis described in \autoref{sec:dynamic} into a project written in C.
