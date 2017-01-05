@@ -612,9 +612,27 @@ support for this project needs to be built separately, greatly increasing the
 complexity of a project's build system. A more streamlined set of tools and
 scripts would alleviate this problem to some extent.
 
-\subsubsection{Slow}
+\subsubsection{Slow} 
+
+Using the tool to iteratively compile a program is a slow process---compilation
+becomes an interactive process where the programmer must provide feedback, and
+the program in question must be executed multiple times at each step.
+Unfortunately, this is the nature of dynamic analysis, and as such this process
+is currently impractical to include as part of a development workflow. If
+execution time is a bottleneck, then one mitigation would be to develop small
+test harnesses that execute only the code in question. However, this would
+ential extra development time to implement.
 
 \subsubsection{False Positives}
+
+The initial loop detection is very sensitive. Little filtering is applied to the
+loops that are discovered, and as such there is likely to be a large proportion
+of these that are not in fact parallelisable. Because each loop requires the
+programmer to manually inspect it, this false positive rate affects the
+usabililty of the tool negatively. A possible partial solution to this problem
+is static analysis of loop bodies for patterns that can conclusively rule them
+out of being parallelisable (for example, a call to a function that is known to
+not be thread safe).
 
 \subsubsection{Limited Applicability} The limited definition of program
 behaviour given in \autoref{ssec:behaviour} means that the tool cannot be

@@ -469,3 +469,9 @@ that describe the tool well:
 Should be obvious but it's worth noting that programs run using this dynamic
 instrumenter need to be pure / deterministic in terms of what they output
 (fill.c serves as a good example of this).
+
+Last remaining part of the writeup to do is completing the evaluation to
+give results based on GSL. Need to actually apply the techniques to one
+of the GSL modules and get some results to write up in the remaining 500
+words. Then go back to the writeup and redraft any bits that sound
+awkward.
