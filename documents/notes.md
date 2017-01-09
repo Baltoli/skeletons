@@ -475,3 +475,34 @@ give results based on GSL. Need to actually apply the techniques to one
 of the GSL modules and get some results to write up in the remaining 500
 words. Then go back to the writeup and redraft any bits that sound
 awkward.
+
+## Evaluation Strategy
+
+Need to work out how I'm going to evaluate the project and get some results to
+put in the last section of the report. Things that I'll need to consider will
+be:
+
+  * Give examples of things that are flagged as maybes (both when they're
+    actually parallelisable and when they aren't), and things that are discarded
+    along with an explanation as to why. A good sample of each category can come
+    from the small example suite I wrote up to test the tool. Should also
+    include an assurance that the code works once it's been parallelised (using
+    OpenMP etc).
+  * Also need a comparison with static analysis. I think the static tool needs a
+    small update to get it to a place where it can find *something* in GSL (if
+    not a lot).
+  * Need to pick a couple of the GSL libraries to work on (i.e. those that can
+    be easily run through the static / dynamic tools to get some kind of
+    tangible result).
+  * Will need a test harness for the GSL library chosen, so that the annotation
+    and reordering process can actually be followed. Should do a bit of
+    tinkering with GSL to make sure I know how to write code that calls it, and
+    can be expected to call the code I'm trying to discover.
+  * Note in the writeup that this is a process that is most likely to be
+    productive when applied to an existing application (but I don't have one).
+  * Alternative is to short-circuit things a bit and just compare the loops
+    found by the static tool to the potential matches found by the dynamic tool,
+    along with some manual inspection of how parallelisable they are.
+  * If doing this manual process, then it makes sense to note some examples
+    found in real code that are yes / no / maybe aliong with the manual criteria
+    that identify them as such.
