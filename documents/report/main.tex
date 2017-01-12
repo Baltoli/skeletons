@@ -327,7 +327,7 @@ output.
 \end{figure}
 
 
-\subsection{Static Analysis}
+\subsection{Static Analysis} \label{ssec:static}
 
 As well as the dynamic analysis described in \autoref{ssec:impl}, I investigated
 the implementation of a static method of performing a similar analysis. A
@@ -696,7 +696,25 @@ the output array).
 \subsection{Comparison with Static Analysis} \label{ssec:compare}
 
 To compare the usefulness of static and dynamic analysis, I ran both tools on
-the source code of a GSL constituent library.
+the source code of a GSL constituent library. In this section I give the results
+obtained, and a comparison between the two analyses.
+
+The \texttt{integration} sub-library of the GSL provides code that performs
+numerical integration of various kinds. \texttt{cloc} reports it as containing a
+total of 7981 lines of code over 38 source files.
+
+Running the static analysis tool on the source code found a total of 16
+parallelisable loop structures within the library (based on the criteria
+described in \autoref{ssec:static}). In contrast, the dynamic analysis tool
+finds 97 loops that could potentially be parallelised. A manual evaluation of a
+portion of these loops found that the majority were in fact parallelisable,
+although it is likely that there would be little to gain in performance by doing
+so indiscriminately.
+
+These results emphasise the difference between the two methods---the dynamic
+analysis is able to find more possible avenues for parallelisation at the
+expense of more developer time, while the static analysis has a narrower scope
+but requires less developer time and is more amenable to automation.
 
 \subsection{Possible Improvements and Further Work}
 
