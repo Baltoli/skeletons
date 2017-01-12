@@ -86,6 +86,12 @@ auto-parallelisation, optimisation, dynamic analysis
 
 \IEEEpeerreviewmaketitle
 
+\section*{Acknowledgements}
+
+I would like to thank Dr.\ Bj\"orne Franke at the University of Edinburgh for
+his suggestion to investigate loop commutativity dynamically. All implementation
+and evaluation of this technique in the report is my own.
+
 \section{Introduction} \label{sec:intro}
 
 An increasingly prevalent trend in computer hardware is that of parallelism.
@@ -588,15 +594,109 @@ code was chosen to be the GNU Scientific Library (GSL) 2.2.1
     lines of C code (not including headers, blank lines or comments).
   \item The code is largely concerned with implementing numerical algorithms,
     and so is likely to contain loops that are potentially parallelisable.
+  \item GSL is equipped with a comprehensive unit test suite that can be used to
+    evaluate program correctness.
 \end{itemize}
 
 Because the GSL is a large project with its own complex build system,
 integrating the automated tools described in \autoref{sec:iter} was not
-practical. Instead, my evaluation was performed manually by writing a test
-harness that linked against the GSL, then manually rebuilding reordered versions
-of the GSL library code being examined.
+practical. Instead, my evaluation was performed by using the unit project's own
+unit tests to determine the correctness of a modification.
+
+\subsection{Examples of Dynamic Analysis Results}
+
+In this subsection I provide some example results from the dynamic tool being
+run on code written specifically for this purpose. The test application is
+comprised of a small library that exposes three functions (randomly filling an
+array with integers, calculating the sum of an array, and copying cumulative
+sums over an array into another array), together with a small executable
+harness. The declarations of these functions are given in
+\autoref{fig:header}.
+
+\begin{figure}[h]
+  \centering
+  \begin{lstlisting}
+void random_fill(long *arr, long n);
+long sum(long *arr, long n);
+void csum(long *in, long *out, long n);
+  \end{lstlisting}
+  \caption{Function definitions from the test library}
+  \label{fig:header}
+\end{figure}
+
+The implementation of each of these functions was then analysed using the
+iterative compilation framework described previously. The results are given
+below, and serve as a useful indication of the usefulness and shortcomings of
+the analysis.
+
+\subsubsection{Random Fill}
+
+\begin{figure}[h]
+  \centering
+  \begin{lstlisting}
+for(long i = 0; i < n; i++) {
+  arr[i] = rand() % FILL_RANGE;
+}
+  \end{lstlisting}
+  \caption{Implementation of random array filling}
+  \label{fig:random}
+\end{figure}
+
+The implementation of the random fill function is given in \autoref{fig:random}.
+The random number generator was seeded deterministically between runs so that
+each execution would generate the same sequence of random numbers. Running the
+loop reordering analysis on this loop reports it as \emph{not} being
+parallelisable. This is expected---even though the calls to \texttt{rand()}
+generate the same sequence of random numbers, they will be placed at different
+locations when the loop is reordered.
+
+\subsubsection{Sum}
+
+\begin{figure}[h]
+  \centering
+  \begin{lstlisting}
+long sum = 0;
+for(long i = 0; i < n; i++) {
+  sum += arr[i];
+}
+  \end{lstlisting}
+  \caption{Implementation of array summation function}
+  \label{fig:sum}
+\end{figure}
+
+The implementation of the sum function is given in \autoref{fig:sum}. When this
+loop was analysed, the tool reports it as possibly being parallelisable (as
+addition is commutative, modulo concerns such as integer overflow). However,
+this serves as a good example of the shortcomings of this analysis. The loop is
+not parallelisable because the addition and assignment is not an atomic
+operation, but non-atomicity cannot be triggered by any sequential reordering of
+the loop. The programmer must still be able to recognize the potential flaw in
+this program.
+
+\subsubsection{Cumulative Sum}
+
+\begin{figure}[h]
+  \centering
+  \begin{lstlisting}
+for(long i = 0; i < n; i++) {
+  out[i] = sum(in, i);
+}
+  \end{lstlisting}
+  \caption{Implementation of array cumulative summation function}
+  \label{fig:csum}
+\end{figure}
+
+The implementation of the cumulative sum function is given in
+\autoref{fig:csum}. As with the sum function, the tool reports this loop as
+being potentially parallelisable. However, in this case the loop is in fact
+parallelisable (as the input array is unmodified, each call to sum is
+independent, and each iteration of the loop only writes to a single location in
+the output array).
 
 \subsection{Comparison with Static Analysis} \label{ssec:compare}
+
+To compare the usefulness of static and dynamic analysis, I ran both tools on
+the source code of a GSL constituent library.
 
 \subsection{Possible Improvements and Further Work}
 
