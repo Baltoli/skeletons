@@ -75,8 +75,8 @@
   future work could provide stronger analyses and a more complex evaluation
   framework for executions. Finally, I give demonstrations of the tool being
   used on both simple example programs written for this purpose and a larger
-  corpus of open source code, along with an evaluation of the successes and
-  failures of this type of analysis.
+  corpus of open source code, finding that the dynamic analysis is able to
+  effectively detect potential sources of parallelism.
 
 \end{abstract}
 
@@ -88,7 +88,7 @@ auto-parallelisation, optimisation, dynamic analysis
 
 \section*{Acknowledgements}
 
-I would like to thank Dr.\ Bj\"orne Franke at the University of Edinburgh for
+I would like to thank Dr.\ Bj\"orn Franke at the University of Edinburgh for
 his suggestion to investigate loop commutativity dynamically. All implementation
 and evaluation of this technique in the report is my own.
 
@@ -96,17 +96,18 @@ and evaluation of this technique in the report is my own.
 
 An increasingly prevalent trend in computer hardware is that of parallelism.
 More than ever, improvements in single-threaded performance are slow in
-comparison to increased parallelism (in many different forms, such as GPGPU
-computation or hyper-threaded CPU cores). However, writing concurrent code that
-is both performant and correct remains an open problem in software engineering.
-The inherent difficulty in this task arises for a number of different
-reasons---cognitive overhead caused by increased complexity in the programming
-model, difficulty in debugging nondeterministic executions, and unintuitive
-performance characteristics. It is for these reasons that the goal of having
-parallelism in programs be automatically detected and exploited is attractive.
-Being able to abstract away as many of the problems of writing parallel code as
-possible means that programmers will be able to work more effectively using
-modern hardware and software features.
+comparison to increased parallelism (in many different forms, such as
+GPGPU\footnote{General Purpose GPU} computation or hyper-threaded CPU cores).
+However, writing concurrent code that is both performant and correct remains an
+open problem in software engineering.  The inherent difficulty in this task
+arises for a number of different reasons---cognitive overhead caused by
+increased complexity in the programming model, difficulty in debugging
+nondeterministic executions, and unintuitive performance characteristics. It is
+for these reasons that the goal of having parallelism in programs be
+automatically detected and exploited is attractive.  Being able to abstract away
+as many of the problems of writing parallel code as possible means that
+programmers will be able to work more effectively using modern hardware and
+software features.
 
 The automatic discovery of parallel structure in code is made far more difficult
 by the unstructured way in which programs are usually written.  The intent of a
@@ -138,9 +139,9 @@ of this approach compared to a static analysis with similar goals.
 
 \section{Dynamic Analysis} \label{sec:dynamic}
 
-In this section I specify the dynamic analysis that will be performed on
-programs, as well as the implementation of this analysis. I also compare the
-analysis to a static version that aims to discover similar patterns in code.
+In this section I describe loop commutativity analysis, a dynamic method for
+discovering parallelisable code. I also compare this analysis to a static
+counterpart that aims to discover similar patterns in code (at the AST level).
 
 \subsection{Specification} \label{ssec:spec}
 
@@ -198,11 +199,11 @@ void map_complex(int *in, int *out, size_t n) {
 \end{figure}
 
 The key property that both of these examples share is that (subject to
-\texttt{f} being free of side effects), the order of loop execution is not
-important to the behaviour of the loop as a whole. That is, the loop iterations
-could be reordered while preserving behaviour.
+\texttt{f} being atomic and free of side effects), the order of loop execution
+is not important to the behaviour of the loop as a whole. That is, the loop
+iterations could be reordered while preserving behaviour.
 
-This property motivates the dynamic analysis implemented as part of this
+This property motivates the analysis implemented as part of this
 project---if the iterations in a loop can be reordered without changing the
 program's behaviour, then there is a good chance that the loop can be
 parallelised. It is worth noting that this analysis cannot identify
@@ -214,12 +215,13 @@ more depth in \autoref{sec:eval}.
 
 \subsection{Implementation} \label{ssec:impl}
 
-The primary goal of the dynamic analysis implemented in this project is to
-identify loops that could potentially be parallelised, and subsequently to
+The primary goal of the loop commutativity analysis implemented in this project
+is to identify loops that could potentially be parallelised, and subsequently to
 reorder the iterations of these loops in an attempt to trigger changes in the
 program's behaviour. If there are no such changes, then there is some evidence
 that the loop could be parallelised (though as discussed previously, this
-evidence is not conclusive).
+evidence is not conclusive). In this section I describe the implementation of
+this analysis:
 
 \subsubsection{Clang Tooling}
 
@@ -272,8 +274,8 @@ the source level (with an unrolled instance of the body for each loop
 iteration).
 
 \textbf{Odd-Even:} half of the iterations are executed first, then the other
-half. This requires that the loop increment is exactly 1 (so that the two
-reordered copies can each have an increment of 2).
+half. This requires that the loop increment is exactly constant (so that the two
+reordered copies can each have a doubled increment).
 
 Each of these strategies is implemented as a method that takes a Clang
 \texttt{ForStmt} node together with some contextual information, then returns a
@@ -283,7 +285,7 @@ replacement for the detected loop.
 The tool accepts a command line parameter specifying the reordering strategy to
 be used on a source file. Each strategy specifies an AST matcher that detects
 loops with the appropriate structure (for example, the odd-even matcher
-specifies an increment of 1, and the random matcher specifies compile-time
+specifies a constant increment, and the random matcher specifies compile-time
 constant initial and bound values).
 
 \subsubsection{Experimentation}
@@ -601,7 +603,7 @@ code was chosen to be the GNU Scientific Library (GSL) 2.2.1
 Because the GSL is a large project with its own complex build system,
 integrating the automated tools described in \autoref{sec:iter} was not
 practical. Instead, my evaluation was performed by using the unit project's own
-unit tests to determine the correctness of a modification.
+unit tests to determine the correctness of a loop reordering.
 
 \subsection{Examples of Dynamic Analysis Results}
 
@@ -706,10 +708,9 @@ total of 7981 lines of code over 38 source files.
 Running the static analysis tool on the source code found a total of 16
 parallelisable loop structures within the library (based on the criteria
 described in \autoref{ssec:static}). In contrast, the dynamic analysis tool
-finds 97 loops that could potentially be parallelised. A manual evaluation of a
-portion of these loops found that the majority were in fact parallelisable,
-although it is likely that there would be little to gain in performance by doing
-so indiscriminately.
+finds 97 loops that could potentially be parallelised. A manual evaluation of 20
+of these loops found 8 that were parallelisable, and 12 that were not (evaluated
+by the GSL unit tests as described previously).
 
 These results emphasise the difference between the two methods---the dynamic
 analysis is able to find more possible avenues for parallelisation at the
@@ -732,14 +733,14 @@ scripts would alleviate this problem to some extent.
 
 \subsubsection{Slow} 
 
-Using the tool to iteratively compile a program is a slow process---compilation
-becomes an interactive process where the programmer must provide feedback, and
-the program in question must be executed multiple times at each step.
-Unfortunately, this is the nature of dynamic analysis, and as such this process
-is currently impractical to include as part of a development workflow. If
-execution time is a bottleneck, then one mitigation would be to develop small
-test harnesses that execute only the code in question. However, this would
-ential extra development time to implement.
+Using the tool to iteratively compile a program is slow---compilation becomes an
+interactive process where the programmer must provide feedback, and the program
+in question must be executed multiple times at each step.  Unfortunately, this
+is the nature of dynamic analysis, and as such it is currently impractical to
+include as part of a development workflow. If execution time is a bottleneck,
+then one mitigation would be to develop small test harnesses that execute only
+the code in question. However, this would ential extra development time to
+implement.
 
 \subsubsection{False Positives}
 
@@ -770,9 +771,9 @@ iterative compilation of a C program, with feedback from a dynamic analysis of
 loop reorderings. I have shown that this strategy can be used to discover
 sources of potential parallelism within an existing codebase, and can be
 integrated into new or smaller projects with a greater degree of automation.
-Additionally, I have given the results of applying this model to a large corpus
-of numerical code. I have compared this dynamic system to a static analysis with
-similar goals, and shown the advantages and disadvantages of each method.
+Additionally, I have given the results of applying this model to parts of the
+GNU Scientific Library. I have compared this dynamic system to a static analysis
+with similar goals, and shown the advantages and disadvantages of each method.
 Finally, I have given a summary of the future work that could be done on this
 system in order to improve its usability.
 
