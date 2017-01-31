@@ -1,1 +1,2 @@
-*.cls linguist-vendored
+*.tex linguist-documentation
+*.sty linguist-documentation
